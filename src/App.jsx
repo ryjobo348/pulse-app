@@ -742,7 +742,14 @@ export default function App() {
         setUser(session.user); loadData(session.user.id);
       }
     });
-    return () => listener.subscription.unsubscribe();
+    // Check every 30s for deleted accounts
+    const sessionCheck = setInterval(async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error || !session) {
+        setUser(null); setProfile(null); setHabits([]); setLogs({}); setLoading(false); setModal(null);
+      }
+    }, 30000);
+    return () => { listener.subscription.unsubscribe(); clearInterval(sessionCheck); };
   }, []);
 
   useEffect(() => {
@@ -838,6 +845,19 @@ export default function App() {
 
   const logout = async () => { await supabase.auth.signOut(); setModal(null); setConfirmDelete(false); };
 
+  // Force sign out if Supabase returns an auth error (e.g. deleted account)
+  const forceSignOut = async (error) => {
+    if (!error) return false;
+    const msg = error?.message || error?.code || "";
+    const isAuthError = msg.includes("JWT") || msg.includes("invalid") || msg.includes("not found") || msg.includes("No user") || error?.status === 401 || error?.status === 403;
+    if (isAuthError) {
+      await supabase.auth.signOut();
+      setUser(null); setProfile(null); setHabits([]); setLogs({}); setModal(null);
+      return true;
+    }
+    return false;
+  };
+
   const deleteAccount = async () => {
     try {
       await supabase.from("habits").delete().eq("user_id", user.id);
@@ -852,31 +872,48 @@ export default function App() {
     const done = !logs[today]?.[id];
     if (done) { setAnimId(id); setTimeout(() => setAnimId(null), 700); }
     setLogs(prev => ({...prev, [today]: {...(prev[today]||{}), [id]: done}}));
-    if (done) await supabase.from("habit_logs").upsert({ habit_id:id, user_id:user.id, log_date:today, completed:true });
-    else { await supabase.from("habit_logs").delete().match({ habit_id:id, log_date:today }); setLogs(prev => { const d={...prev[today]}; delete d[id]; return {...prev,[today]:d}; }); }
+    if (done) {
+      const { error } = await supabase.from("habit_logs").upsert({ habit_id:id, user_id:user.id, log_date:today, completed:true });
+      if (error) await forceSignOut(error);
+    } else {
+      const { error } = await supabase.from("habit_logs").delete().match({ habit_id:id, log_date:today });
+      if (error) await forceSignOut(error);
+      else setLogs(prev => { const d={...prev[today]}; delete d[id]; return {...prev,[today]:d}; });
+    }
   };
 
   const saveHabit = async () => {
     if (!form.name.trim()) return;
     setSaving(true);
     if (editTarget) {
-      const { data } = await supabase.from("habits").update({ name:form.name, icon:form.icon, color:form.color }).eq("id", editTarget).select().single();
+      const { data, error } = await supabase.from("habits").update({ name:form.name, icon:form.icon, color:form.color }).eq("id", editTarget).select().single();
+      if (error) { await forceSignOut(error); setSaving(false); return; }
       setHabits(prev => prev.map(h => h.id===editTarget ? data : h));
     } else {
       if (atLimit) { setModal("upgrade"); setSaving(false); return; }
-      const { data } = await supabase.from("habits").insert({ name:form.name, icon:form.icon, color:form.color, user_id:user.id }).select().single();
+      const { data, error } = await supabase.from("habits").insert({ name:form.name, icon:form.icon, color:form.color, user_id:user.id }).select().single();
+      if (error) { await forceSignOut(error); setSaving(false); return; }
       setHabits(prev => [...prev, data]);
     }
     setSaving(false); setModal(null); setEditTarget(null); setForm({name:"",icon:"🔥",color:COLORS[0]});
   };
 
   const openEdit = (h) => { setForm({name:h.name,icon:h.icon,color:h.color}); setEditTarget(h.id); setModal("edit"); };
-  const deleteHabit = async (id) => { setHabits(prev => prev.filter(h => h.id !== id)); await supabase.from("habits").delete().eq("id", id); };
+  const deleteHabit = async (id) => {
+    setHabits(prev => prev.filter(h => h.id !== id));
+    const { error } = await supabase.from("habits").delete().eq("id", id);
+    if (error) await forceSignOut(error);
+  };
   const toggleLogDay = async (habitId, dateKey) => {
     const done = !logs[dateKey]?.[habitId];
     setLogs(prev => { const d={...prev[dateKey]}; if(done) d[habitId]=true; else delete d[habitId]; return {...prev,[dateKey]:d}; });
-    if (done) await supabase.from("habit_logs").upsert({ habit_id:habitId, user_id:user.id, log_date:dateKey, completed:true });
-    else await supabase.from("habit_logs").delete().match({ habit_id:habitId, log_date:dateKey });
+    if (done) {
+      const { error } = await supabase.from("habit_logs").upsert({ habit_id:habitId, user_id:user.id, log_date:dateKey, completed:true });
+      if (error) await forceSignOut(error);
+    } else {
+      const { error } = await supabase.from("habit_logs").delete().match({ habit_id:habitId, log_date:dateKey });
+      if (error) await forceSignOut(error);
+    }
   };
 
   const completedToday = habits.filter(h => logs[today]?.[h.id]).length;
