@@ -79,7 +79,7 @@ const T = {
     reminders:"Reminders", neverBreak:"Never break your chain",
     monthly:"MONTHLY", annual:"ANNUAL", perMonth:"per month", perYear:"per year",
     bestValue:"BEST VALUE", upgradeNow:"Upgrade Now", signUpGoPro:"Sign Up and Go Pro",
-    cancelAnytime:"Cancel anytime — No refunds",
+    cancelAnytime:"Cancel anytime — no refunds",
     statsTitle:"Your Progress", statsProOnly:"Stats are Pro-only",
     statsProDesc:"Unlock detailed 30-day heatmaps, completion rates, and streak analytics.",
     unlockStats:"Unlock Stats - Go Pro", addHabitsStats:"Add habits to see your stats",
@@ -1096,6 +1096,29 @@ export default function App() {
             )}
           </div>
         )}
+      </div>
+
+
+      {/* Legal Footer */}
+      <div style={{width:"100%",maxWidth:430,padding:"24px 20px 120px",textAlign:"center"}}>
+        <div style={{fontSize:11,color:"#333350",marginBottom:10}}>
+          {"\u00a9 "}{new Date().getFullYear()}{" Pulse. All rights reserved."}
+        </div>
+        <div style={{display:"flex",justifyContent:"center",flexWrap:"wrap",gap:"6px 16px"}}>
+          {[
+            {label:"Privacy Policy",   href:"https://pulse-app-taupe.vercel.app/privacy"},
+            {label:"Terms of Service", href:"https://pulse-app-taupe.vercel.app/terms"},
+            {label:"Refund Policy",    href:"https://pulse-app-taupe.vercel.app/refunds"},
+            {label:"Cookie Policy",    href:"https://pulse-app-taupe.vercel.app/cookies"},
+          ].map(({label,href})=>(
+            <a key={label} href={href} target="_blank" rel="noopener noreferrer"
+              style={{fontSize:11,color:"#444460",textDecoration:"none",transition:"color .2s"}}
+              onMouseEnter={e=>e.target.style.color="#A0A0C8"}
+              onMouseLeave={e=>e.target.style.color="#444460"}>
+              {label}
+            </a>
+          ))}
+        </div>
       </div>
 
       {/* Nav */}
