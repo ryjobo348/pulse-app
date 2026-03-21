@@ -1216,9 +1216,20 @@ export default function App() {
                 <div style={{fontSize:11,color:"#888AC0"}}>{t.perYear}</div>
               </div>
             </div>
-            <button className="btn-primary" onClick={()=>{if(!user){setModal("auth");return;}setModal(null);}}>
-              {user ? t.upgradeNow + " ✦" : t.signUpGoPro}
-            </button>
+            <div style={{display:"flex",flexDirection:"column",gap:10}}>
+              <button className="btn-primary" onClick={()=>{
+                if(!user){setModal("auth");return;}
+                window.open("https://buy.stripe.com/test_9B6eVd8eUdb3cazcbU4Ni00","_blank");
+              }}>
+                {user ? t.upgradeNow + " ✦ (Monthly)" : t.signUpGoPro}
+              </button>
+              <button className="btn-primary" onClick={()=>{
+                if(!user){setModal("auth");return;}
+                window.open("https://buy.stripe.com/test_aFa14n66M3At3E30tc4Ni01","_blank");
+              }} style={{background:"linear-gradient(135deg,#FFD166,#FF8C42)",color:"#0A0A0F"}}>
+                {user ? t.upgradeNow + " ✦ (Annual — Best Value)" : t.signUpGoPro}
+              </button>
+            </div>
             <div style={{textAlign:"center",marginTop:10,fontSize:11,color:"#444460"}}>{t.cancelAnytime}</div>
           </div>
         </div>
