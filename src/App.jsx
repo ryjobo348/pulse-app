@@ -79,7 +79,7 @@ const T = {
     reminders:"Reminders", neverBreak:"Never break your chain",
     monthly:"MONTHLY", annual:"ANNUAL", perMonth:"per month", perYear:"per year",
     bestValue:"BEST VALUE", upgradeNow:"Upgrade Now", signUpGoPro:"Sign Up and Go Pro",
-    cancelAnytime:"Cancel anytime — no refunds",
+    cancelAnytime:"Cancel anytime — No refunds",
     statsTitle:"Your Progress", statsProOnly:"Stats are Pro-only",
     statsProDesc:"Unlock detailed 30-day heatmaps, completion rates, and streak analytics.",
     unlockStats:"Unlock Stats - Go Pro", addHabitsStats:"Add habits to see your stats",
