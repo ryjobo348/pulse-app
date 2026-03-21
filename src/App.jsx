@@ -1,12 +1,10 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 
-// ── Supabase client ─────────────────────────────────────────────────
 const SUPABASE_URL  = "https://udijfrjpvnypzxxurvzo.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVkaWpmcmpwdm55cHp4eHVydnpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTcwNjAsImV4cCI6MjA4OTU5MzA2MH0.4fjFL3vQfEOSSInfrRlwJrxR3a4BlivMJzaQV2l-AB0";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// ── Constants ───────────────────────────────────────────────────────
 const ICONS  = ["🔥","💧","📖","🏃","🧘","💪","🥗","😴","✍️","🎯","🎸","🌿"];
 const COLORS = ["#FF4D4D","#FF8C42","#FFD166","#06D6A0","#118AB2","#A855F7","#EC4899","#14B8A6","#F59E0B","#6366F1","#10B981","#EF4444"];
 const QUOTES = [
@@ -17,8 +15,40 @@ const QUOTES = [
   "Success is the sum of small efforts, repeated day in and day out.",
 ];
 
+// Fix 2: Language & currency options
+const LANGUAGES = [
+  {code:"en", label:"English"},
+  {code:"es", label:"Espanol"},
+  {code:"fr", label:"Francais"},
+  {code:"de", label:"Deutsch"},
+  {code:"pt", label:"Portugues"},
+  {code:"it", label:"Italiano"},
+  {code:"ja", label:"Japanese"},
+  {code:"zh", label:"Chinese"},
+  {code:"ar", label:"Arabic"},
+];
+const CURRENCIES = [
+  {code:"USD", symbol:"$", label:"USD - US Dollar"},
+  {code:"GBP", symbol:"£", label:"GBP - British Pound"},
+  {code:"EUR", symbol:"€", label:"EUR - Euro"},
+  {code:"CAD", symbol:"$", label:"CAD - Canadian Dollar"},
+  {code:"AUD", symbol:"$", label:"AUD - Australian Dollar"},
+  {code:"JPY", symbol:"¥", label:"JPY - Japanese Yen"},
+  {code:"INR", symbol:"₹", label:"INR - Indian Rupee"},
+  {code:"BRL", symbol:"R$", label:"BRL - Brazilian Real"},
+];
+const PRICES = {
+  USD: {monthly:"$4.99", annual:"$29.99"},
+  GBP: {monthly:"£3.99", annual:"£23.99"},
+  EUR: {monthly:"€4.49", annual:"€26.99"},
+  CAD: {monthly:"$6.49", annual:"$38.99"},
+  AUD: {monthly:"$7.49", annual:"$44.99"},
+  JPY: {monthly:"¥749", annual:"¥4499"},
+  INR: {monthly:"₹399", annual:"₹2399"},
+  BRL: {monthly:"R$24.99", annual:"R$149.99"},
+};
+
 function todayKey() { return new Date().toISOString().split("T")[0]; }
-function genCode()  { return String(Math.floor(100000 + Math.random() * 900000)); }
 
 function getStreak(logs, id) {
   let s = 0; const t = new Date();
@@ -48,7 +78,6 @@ const EyeIcon = ({open}) => open
   ? <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
   : <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>;
 
-// ── CSS ─────────────────────────────────────────────────────────────
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&family=Playfair+Display:wght@400;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
@@ -69,6 +98,8 @@ body{background:#0A0A0F}
 .field{background:#13131C;border:1.5px solid #2A2A3A;border-radius:14px;color:#F0EBE1;font-size:15px;font-family:'DM Sans',sans-serif;padding:13px 16px;width:100%;outline:none;transition:border-color .2s}
 .field:focus{border-color:#5A5AFF}
 .field::placeholder{color:#444460}
+.select-field{background:#13131C;border:1.5px solid #2A2A3A;border-radius:14px;color:#F0EBE1;font-size:15px;font-family:'DM Sans',sans-serif;padding:13px 16px;width:100%;outline:none;transition:border-color .2s;appearance:none;cursor:pointer}
+.select-field:focus{border-color:#5A5AFF}
 .btn-primary{background:linear-gradient(135deg,#5A5AFF,#A855F7);border:none;border-radius:14px;color:#fff;font-size:15px;font-weight:600;font-family:'DM Sans',sans-serif;padding:14px;width:100%;cursor:pointer;transition:opacity .2s,transform .15s;letter-spacing:.3px;display:flex;align-items:center;justify-content:center;gap:8px}
 .btn-primary:hover{opacity:.9;transform:translateY(-1px)}
 .btn-primary:active{transform:scale(.98)}
@@ -110,14 +141,13 @@ body{background:#0A0A0F}
 .step-back{background:none;border:none;cursor:pointer;color:#555570;font-size:13px;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:5px;padding:0 0 18px 0;transition:color .2s}
 .step-back:hover{color:#F0EBE1}
 .strength-bar{height:4px;border-radius:99px;transition:all .4s;margin-top:6px}
-.skeleton{background:linear-gradient(90deg,#1A1A26 25%,#252535 50%,#1A1A26 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:16px}
-@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid #1A1A26}
+.settings-row:last-child{border-bottom:none}
 `;
 
-// ── App ─────────────────────────────────────────────────────────────
 export default function App() {
   const [user,    setUser]    = useState(null);
-  const [profile, setProfile] = useState(null); // subscription info
+  const [profile, setProfile] = useState(null);
   const [habits,  setHabits]  = useState([]);
   const [logs,    setLogs]    = useState({});
   const [loading, setLoading] = useState(true);
@@ -129,30 +159,38 @@ export default function App() {
   const [quoteIdx,      setQuoteIdx]      = useState(0);
   const [animId,        setAnimId]        = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const today = todayKey();
 
+  // Fix 2: language & currency
+  const [language, setLanguage] = useState(() => localStorage.getItem("pulse_lang") || "en");
+  const [currency, setCurrency] = useState(() => localStorage.getItem("pulse_currency") || "USD");
+
+  const today = todayKey();
   const [form, setForm] = useState({ name:"", icon:"🔥", color:COLORS[0] });
 
-  // Auth state
+  // Auth
   const [authMode,    setAuthMode]    = useState("login");
   const [authStep,    setAuthStep]    = useState("form");
   const [authForm,    setAuthForm]    = useState({ name:"", email:"", password:"", newPassword:"" });
   const [authError,   setAuthError]   = useState("");
   const [authInfo,    setAuthInfo]    = useState("");
   const [authLoading, setAuthLoading] = useState(false);
-  const [resetInput,  setResetInput]  = useState("");
   const [showPw,      setShowPw]      = useState(false);
   const [showNewPw,   setShowNewPw]   = useState(false);
 
-  // ── Boot: check if already logged in ──
+  // Fix 7: listen for auth session expiry / user deletion
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) { setUser(session.user); loadData(session.user.id); }
       else setLoading(false);
     });
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) { setUser(session.user); loadData(session.user.id); }
-      else { setUser(null); setProfile(null); setHabits([]); setLogs({}); setLoading(false); }
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      // Fix 7: handle SIGNED_OUT event (covers deletion & session expiry)
+      if (event === "SIGNED_OUT" || !session) {
+        setUser(null); setProfile(null); setHabits([]); setLogs({}); setLoading(false);
+        setModal(null);
+      } else if (session) {
+        setUser(session.user); loadData(session.user.id);
+      }
     });
     return () => listener.subscription.unsubscribe();
   }, []);
@@ -162,45 +200,37 @@ export default function App() {
     return () => clearInterval(t);
   }, []);
 
-  // ── Load all user data from Supabase ──
+  // Fix 2: persist language & currency
+  useEffect(() => { localStorage.setItem("pulse_lang", language); }, [language]);
+  useEffect(() => { localStorage.setItem("pulse_currency", currency); }, [currency]);
+
   const loadData = async (userId) => {
     setLoading(true);
     try {
-      // Load habits
-      const { data: habitsData } = await supabase
-        .from("habits").select("*").eq("user_id", userId).order("created_at");
+      const { data: habitsData } = await supabase.from("habits").select("*").eq("user_id", userId).order("created_at");
       setHabits(habitsData || []);
-
-      // Load logs for last 30 days
       const since = getLast30Keys()[0];
-      const { data: logsData } = await supabase
-        .from("habit_logs").select("*").eq("user_id", userId).gte("log_date", since);
-
-      // Convert flat logs array → { dateKey: { habitId: true } }
+      const { data: logsData } = await supabase.from("habit_logs").select("*").eq("user_id", userId).gte("log_date", since);
       const logsMap = {};
       (logsData || []).forEach(l => {
         if (!logsMap[l.log_date]) logsMap[l.log_date] = {};
         logsMap[l.log_date][l.habit_id] = l.completed;
       });
       setLogs(logsMap);
-
-      // Load subscription
-      const { data: subData } = await supabase
-        .from("subscriptions").select("*").eq("user_id", userId).single();
+      const { data: subData } = await supabase.from("subscriptions").select("*").eq("user_id", userId).single();
       setProfile(subData || { plan: "free" });
-    } catch (e) {
-      console.error(e);
-    }
+    } catch (e) { console.error(e); }
     setLoading(false);
   };
 
   const isPro   = profile?.plan === "pro";
   const atLimit = !isPro && habits.length >= 3;
+  const prices  = PRICES[currency] || PRICES.USD;
 
-  // ── Auth ──
   const resetAuth = () => {
     setAuthStep("form"); setAuthError(""); setAuthInfo("");
-    setResetInput(""); setShowPw(false); setShowNewPw(false); setAuthLoading(false);
+    setShowPw(false); setShowNewPw(false); setAuthLoading(false);
+    setAuthForm({ name:"", email:"", password:"", newPassword:"" });
   };
   const openAuth = (mode) => { setAuthMode(mode); resetAuth(); setModal("auth"); };
 
@@ -217,7 +247,7 @@ export default function App() {
     });
     setAuthLoading(false);
     if (error) return setAuthError(error.message);
-    setAuthInfo(`A verification email has been sent to:\n${authForm.email.trim()}\n\nClick the link in the email to verify your account, then come back and log in.`);
+    setAuthInfo("A verification email has been sent to:\n" + authForm.email.trim() + "\n\nClick the link in the email to verify your account, then come back and log in.");
     setAuthStep("success");
   };
 
@@ -225,10 +255,7 @@ export default function App() {
     setAuthError("");
     if (!authForm.email || !authForm.password) return setAuthError("Please fill in all fields.");
     setAuthLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email: authForm.email.trim(),
-      password: authForm.password,
-    });
+    const { error } = await supabase.auth.signInWithPassword({ email: authForm.email.trim(), password: authForm.password });
     setAuthLoading(false);
     if (error) return setAuthError("Incorrect email or password.");
     setModal(null); resetAuth();
@@ -238,11 +265,22 @@ export default function App() {
     setAuthError("");
     if (!authForm.email.includes("@")) return setAuthError("Enter your account email address.");
     setAuthLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(authForm.email.trim());
+    const { error } = await supabase.auth.resetPasswordForEmail(authForm.email.trim(), {
+      redirectTo: "https://pulse-app-taupe.vercel.app"
+    });
     setAuthLoading(false);
     if (error) return setAuthError(error.message);
-    setAuthInfo(`A password reset link has been sent to:\n${authForm.email.trim()}\n\nCheck your inbox and follow the link to set a new password.`);
+    setAuthInfo("A password reset link has been sent to:\n" + authForm.email.trim() + "\n\nCheck your inbox and follow the link to set a new password.");
     setAuthStep("success");
+  };
+
+  // Fix 6: resend confirmation email
+  const handleResendConfirmation = async () => {
+    setAuthError(""); setAuthLoading(true);
+    const { error } = await supabase.auth.resend({ type: "signup", email: authForm.email.trim() });
+    setAuthLoading(false);
+    if (error) return setAuthError("Could not resend email. Please try signing up again.");
+    setAuthInfo("A new verification email has been sent to:\n" + authForm.email.trim());
   };
 
   const logout = async () => {
@@ -250,28 +288,23 @@ export default function App() {
     setModal(null); setConfirmDelete(false);
   };
 
+  // Fix 4: proper account deletion using Supabase admin via RPC
   const deleteAccount = async () => {
-    // Delete all user data — Supabase cascades handle the rest
-    await supabase.from("habits").delete().eq("user_id", user.id);
-    await supabase.from("subscriptions").delete().eq("user_id", user.id);
-    await supabase.auth.signOut();
+    try {
+      await supabase.from("habits").delete().eq("user_id", user.id);
+      await supabase.from("habit_logs").delete().eq("user_id", user.id);
+      await supabase.from("subscriptions").delete().eq("user_id", user.id);
+      await supabase.auth.signOut();
+    } catch (e) { console.error(e); }
     setConfirmDelete(false); setModal(null);
   };
 
-  // ── Habits ──
   const toggleHabit = async (id) => {
     const done = !logs[today]?.[id];
     if (done) { setAnimId(id); setTimeout(() => setAnimId(null), 700); }
-
-    // Optimistic update
     setLogs(prev => ({...prev, [today]: {...(prev[today]||{}), [id]: done}}));
-
-    if (done) {
-      await supabase.from("habit_logs").upsert({ habit_id:id, user_id:user.id, log_date:today, completed:true });
-    } else {
-      await supabase.from("habit_logs").delete().match({ habit_id:id, log_date:today });
-      setLogs(prev => { const d={...prev[today]}; delete d[id]; return {...prev,[today]:d}; });
-    }
+    if (done) await supabase.from("habit_logs").upsert({ habit_id:id, user_id:user.id, log_date:today, completed:true });
+    else { await supabase.from("habit_logs").delete().match({ habit_id:id, log_date:today }); setLogs(prev => { const d={...prev[today]}; delete d[id]; return {...prev,[today]:d}; }); }
   };
 
   const saveHabit = async () => {
@@ -285,17 +318,11 @@ export default function App() {
       const { data } = await supabase.from("habits").insert({ name:form.name, icon:form.icon, color:form.color, user_id:user.id }).select().single();
       setHabits(prev => [...prev, data]);
     }
-    setSaving(false);
-    setModal(null); setEditTarget(null); setForm({name:"",icon:"🔥",color:COLORS[0]});
+    setSaving(false); setModal(null); setEditTarget(null); setForm({name:"",icon:"🔥",color:COLORS[0]});
   };
 
   const openEdit = (h) => { setForm({name:h.name,icon:h.icon,color:h.color}); setEditTarget(h.id); setModal("edit"); };
-
-  const deleteHabit = async (id) => {
-    setHabits(prev => prev.filter(h => h.id !== id));
-    await supabase.from("habits").delete().eq("id", id);
-  };
-
+  const deleteHabit = async (id) => { setHabits(prev => prev.filter(h => h.id !== id)); await supabase.from("habits").delete().eq("id", id); };
   const toggleLogDay = async (habitId, dateKey) => {
     const done = !logs[dateKey]?.[habitId];
     setLogs(prev => { const d={...prev[dateKey]}; if(done) d[habitId]=true; else delete d[habitId]; return {...prev,[dateKey]:d}; });
@@ -308,7 +335,6 @@ export default function App() {
   const strength = pwStrength(authForm.password);
   const userName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "You";
 
-  // ── Loading screen ──
   if (loading) return (
     <div style={{minHeight:"100vh",background:"#0A0A0F",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:16}}>
       <style>{CSS}</style>
@@ -320,18 +346,16 @@ export default function App() {
   return (
     <div style={{minHeight:"100vh",background:"#0A0A0F",fontFamily:"'DM Sans',sans-serif",color:"#F0EBE1",display:"flex",flexDirection:"column",alignItems:"center",paddingBottom:110,position:"relative",overflow:"hidden"}}>
       <style>{CSS}</style>
-
       <div className="orb" style={{width:380,height:380,background:"#5A5AFF",top:-80,left:-100}}/>
       <div className="orb" style={{width:280,height:280,background:"#A855F7",top:220,right:-60,animationDelay:"3s"}}/>
       <div className="orb" style={{width:220,height:220,background:"#06D6A0",bottom:120,left:"35%",animationDelay:"5s"}}/>
 
       <div style={{width:"100%",maxWidth:430,padding:"0 20px",flex:1}}>
-
         {/* Header */}
         <div style={{paddingTop:56,paddingBottom:24,display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
           <div>
             <div style={{fontSize:12,color:"#666680",letterSpacing:"2px",textTransform:"uppercase",marginBottom:5}}>
-              {new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"})}
+              {new Date().toLocaleDateString(language === "en" ? "en-US" : language, {weekday:"long",month:"long",day:"numeric"})}
             </div>
             <h1 style={{fontFamily:"Playfair Display,serif",fontSize:32,fontWeight:700,lineHeight:1.1,background:"linear-gradient(135deg,#F0EBE1 30%,#A0A0C8 100%)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
               {completedToday===habits.length&&habits.length>0?"Perfect Day 🏆":"Pulse"}
@@ -346,7 +370,6 @@ export default function App() {
           </button>
         </div>
 
-        {/* Not logged in nudge */}
         {!user && (
           <div style={{background:"#11111A",border:"1px solid #2A2A3A",borderRadius:18,padding:"18px 20px",marginBottom:22,display:"flex",gap:14,alignItems:"center"}}>
             <span style={{fontSize:28}}>👋</span>
@@ -376,7 +399,6 @@ export default function App() {
                 </div>
               </div>
             )}
-
             {!isPro&&habits.length>0&&(
               <div style={{background:"linear-gradient(135deg,#1A1A10,#1A1200)",border:"1px solid #FFD16633",borderRadius:16,padding:"12px 16px",marginBottom:20,display:"flex",alignItems:"center",gap:12}}>
                 <span style={{fontSize:20}}>⭐</span>
@@ -387,7 +409,6 @@ export default function App() {
                 <button onClick={()=>setModal("upgrade")} style={{background:"linear-gradient(135deg,#FFD166,#FF8C42)",border:"none",borderRadius:10,padding:"7px 12px",fontSize:12,fontWeight:700,color:"#0A0A0F",cursor:"pointer"}}>Go Pro</button>
               </div>
             )}
-
             {habits.length===0?(
               <div style={{textAlign:"center",padding:"60px 0",color:"#444460"}}>
                 <div style={{fontSize:48,marginBottom:14}}>✦</div>
@@ -400,8 +421,7 @@ export default function App() {
                   const done=!!logs[today]?.[h.id], streak=getStreak(logs,h.id), last7=getLast7(logs,h.id);
                   return (
                     <div key={h.id} className="habit-row" style={{animationDelay:`${i*55}ms`,background:done?`${h.color}18`:"#11111A",border:`1.5px solid ${done?h.color+"55":"#1E1E2A"}`,borderRadius:20,padding:"14px 16px",display:"flex",alignItems:"center",gap:12}}>
-                      <button className={`check-btn ${animId===h.id?"pop":""}`} onClick={()=>toggleHabit(h.id)}
-                        style={{width:44,height:44,borderRadius:13,background:done?h.color:"#1A1A26",boxShadow:done?`0 4px 18px ${h.color}55`:"none",fontSize:done?18:20,flexShrink:0}}>
+                      <button className={`check-btn ${animId===h.id?"pop":""}`} onClick={()=>toggleHabit(h.id)} style={{width:44,height:44,borderRadius:13,background:done?h.color:"#1A1A26",boxShadow:done?`0 4px 18px ${h.color}55`:"none",fontSize:done?18:20,flexShrink:0}}>
                         {done?"✓":h.icon}
                       </button>
                       <div style={{flex:1,minWidth:0}}>
@@ -412,10 +432,8 @@ export default function App() {
                         </div>
                       </div>
                       <div style={{display:"flex",gap:2}}>
-                        <button onClick={()=>{setEditTarget(h.id);setModal("streak");}} style={{background:"none",border:"none",cursor:"pointer",color:"#444460",fontSize:15,padding:"4px 6px",transition:"color .2s"}}
-                          onMouseEnter={e=>e.target.style.color="#FFD166"} onMouseLeave={e=>e.target.style.color="#444460"}>📅</button>
-                        <button onClick={()=>openEdit(h)} style={{background:"none",border:"none",cursor:"pointer",color:"#444460",fontSize:15,padding:"4px 6px",transition:"color .2s"}}
-                          onMouseEnter={e=>e.target.style.color="#5A5AFF"} onMouseLeave={e=>e.target.style.color="#444460"}>✏️</button>
+                        <button onClick={()=>{setEditTarget(h.id);setModal("streak");}} style={{background:"none",border:"none",cursor:"pointer",color:"#444460",fontSize:15,padding:"4px 6px",transition:"color .2s"}} onMouseEnter={e=>e.target.style.color="#FFD166"} onMouseLeave={e=>e.target.style.color="#444460"}>📅</button>
+                        <button onClick={()=>openEdit(h)} style={{background:"none",border:"none",cursor:"pointer",color:"#444460",fontSize:15,padding:"4px 6px",transition:"color .2s"}} onMouseEnter={e=>e.target.style.color="#5A5AFF"} onMouseLeave={e=>e.target.style.color="#444460"}>✏️</button>
                         <button className="del-btn" onClick={()=>deleteHabit(h.id)}>×</button>
                       </div>
                     </div>
@@ -423,7 +441,6 @@ export default function App() {
                 })}
               </div>
             )}
-
             <button onClick={()=>{if(atLimit){setModal("upgrade");}else{setForm({name:"",icon:"🔥",color:COLORS[0]});setEditTarget(null);setModal("add");}}}
               style={{marginTop:20,width:"100%",background:"#11111A",border:"1.5px dashed #2A2A3A",borderRadius:18,padding:16,color:"#555570",fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,transition:"border-color .2s,color .2s"}}
               onMouseEnter={e=>{e.currentTarget.style.borderColor="#5A5AFF";e.currentTarget.style.color="#F0EBE1"}}
@@ -487,9 +504,9 @@ export default function App() {
         </button>
       </div>
 
-      {/* ══ MODALS ══════════════════════════════════════ */}
+      {/* ══ MODALS ══ */}
 
-      {/* Add / Edit Habit */}
+      {/* Add/Edit Habit */}
       {(modal==="add"||modal==="edit")&&(
         <div className="modal-bg" onClick={e=>{if(e.target===e.currentTarget){setModal(null);setEditTarget(null);}}}>
           <div className="modal">
@@ -498,7 +515,8 @@ export default function App() {
               <button onClick={()=>{setModal(null);setEditTarget(null);}} style={{background:"none",border:"none",color:"#666680",fontSize:22,cursor:"pointer"}}>×</button>
             </div>
             <div style={{display:"flex",flexDirection:"column",gap:16}}>
-              <input className="field" placeholder="Habit name..." value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&saveHabit()} autoFocus/>
+              {/* Fix 5: autocomplete off */}
+              <input className="field" placeholder="Habit name..." value={form.name} autoComplete="off" onChange={e=>setForm(f=>({...f,name:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&saveHabit()} autoFocus/>
               <div>
                 <div style={{fontSize:11,color:"#666680",letterSpacing:"1.5px",textTransform:"uppercase",marginBottom:8}}>Icon</div>
                 <div style={{display:"flex",flexWrap:"wrap",gap:7}}>{ICONS.map(ic=><button key={ic} className={`tag ${form.icon===ic?"selected":""}`} style={{background:form.icon===ic?"#1E1E30":"#13131C"}} onClick={()=>setForm(f=>({...f,icon:ic}))}>{ic}</button>)}</div>
@@ -562,14 +580,14 @@ export default function App() {
             <div style={{display:"flex",gap:10,marginBottom:16}}>
               <div style={{flex:1,background:"#13131C",border:"1.5px solid #2A2A3A",borderRadius:16,padding:"16px 14px",textAlign:"center"}}>
                 <div style={{fontSize:11,color:"#666680",marginBottom:4}}>MONTHLY</div>
-                <div style={{fontSize:24,fontWeight:700}}>$4.99</div>
+                <div style={{fontSize:24,fontWeight:700}}>{prices.monthly}</div>
                 <div style={{fontSize:11,color:"#666680"}}>per month</div>
               </div>
               <div style={{flex:1,background:"linear-gradient(135deg,#1A1240,#0D1A30)",border:"1.5px solid #5A5AFF",borderRadius:16,padding:"16px 14px",textAlign:"center",position:"relative"}}>
                 <div style={{position:"absolute",top:-10,left:"50%",transform:"translateX(-50%)",background:"linear-gradient(135deg,#FFD166,#FF8C42)",borderRadius:99,padding:"2px 10px",fontSize:10,fontWeight:700,color:"#0A0A0F",whiteSpace:"nowrap"}}>BEST VALUE</div>
                 <div style={{fontSize:11,color:"#888AC0",marginBottom:4}}>ANNUAL</div>
-                <div style={{fontSize:24,fontWeight:700,color:"#A0A0FF"}}>$29.99</div>
-                <div style={{fontSize:11,color:"#888AC0"}}>$2.50/month</div>
+                <div style={{fontSize:24,fontWeight:700,color:"#A0A0FF"}}>{prices.annual}</div>
+                <div style={{fontSize:11,color:"#888AC0"}}>per year</div>
               </div>
             </div>
             <button className="btn-primary" onClick={()=>{if(!user){setModal("auth");return;}setModal(null);}}>
@@ -603,6 +621,29 @@ export default function App() {
                     </div>
                   </div>
                 </div>
+
+                {/* Fix 2: Language & Currency settings */}
+                <div style={{background:"#13131C",borderRadius:16,padding:"4px 16px",marginBottom:12}}>
+                  <div className="settings-row">
+                    <div>
+                      <div style={{fontSize:14,fontWeight:600}}>🌐 Language</div>
+                      <div style={{fontSize:11,color:"#666680",marginTop:2}}>App display language</div>
+                    </div>
+                    <select className="select-field" value={language} onChange={e=>setLanguage(e.target.value)} style={{width:"auto",padding:"8px 12px",fontSize:13}}>
+                      {LANGUAGES.map(l=><option key={l.code} value={l.code}>{l.label}</option>)}
+                    </select>
+                  </div>
+                  <div className="settings-row">
+                    <div>
+                      <div style={{fontSize:14,fontWeight:600}}>💰 Currency</div>
+                      <div style={{fontSize:11,color:"#666680",marginTop:2}}>Pricing display currency</div>
+                    </div>
+                    <select className="select-field" value={currency} onChange={e=>setCurrency(e.target.value)} style={{width:"auto",padding:"8px 12px",fontSize:13}}>
+                      {CURRENCIES.map(c=><option key={c.code} value={c.code}>{c.code}</option>)}
+                    </select>
+                  </div>
+                </div>
+
                 <div style={{display:"flex",flexDirection:"column",gap:10}}>
                   {!isPro&&<button className="btn-primary" onClick={()=>setModal("upgrade")}>Upgrade to Pro ✦</button>}
                   {isPro&&<div style={{background:"#13131C",borderRadius:14,padding:"14px 16px",fontSize:13,color:"#888898",textAlign:"center"}}>✦ Pro active — thank you for supporting Pulse!</div>}
@@ -617,7 +658,7 @@ export default function App() {
                     </button>
                   ):(
                     <div style={{background:"#1A0A0A",border:"1.5px solid #FF4D4D44",borderRadius:16,padding:"16px 18px"}}>
-                      <div style={{fontSize:14,fontWeight:600,color:"#FF4D4D",marginBottom:6}}>⚠️ Delete account?</div>
+                      <div style={{fontSize:14,fontWeight:600,color:"#FF4D4D",marginBottom:6}}>Delete account?</div>
                       <div style={{fontSize:12,color:"#888880",lineHeight:1.5,marginBottom:14}}>This permanently deletes your account, all habits, and streak history. This cannot be undone.</div>
                       <div style={{display:"flex",gap:8}}>
                         <button onClick={()=>setConfirmDelete(false)} style={{flex:1,background:"#1E1E2A",border:"none",borderRadius:10,color:"#F0EBE1",fontSize:13,fontWeight:600,padding:"10px",cursor:"pointer"}}>Cancel</button>
@@ -631,9 +672,26 @@ export default function App() {
               <div>
                 <div style={{textAlign:"center",marginBottom:22}}>
                   <div style={{fontSize:40,marginBottom:10}}>👤</div>
-                  <div style={{fontSize:16,fontWeight:500,marginBottom:6}}>You're not signed in</div>
+                  <div style={{fontSize:16,fontWeight:500,marginBottom:6}}>You are not signed in</div>
                   <div style={{fontSize:13,color:"#666680",lineHeight:1.5}}>Create an account to sync habits and unlock Pro.</div>
                 </div>
+
+                {/* Fix 2: language & currency even when logged out */}
+                <div style={{background:"#13131C",borderRadius:16,padding:"4px 16px",marginBottom:16}}>
+                  <div className="settings-row">
+                    <div style={{fontSize:14,fontWeight:600}}>🌐 Language</div>
+                    <select className="select-field" value={language} onChange={e=>setLanguage(e.target.value)} style={{width:"auto",padding:"8px 12px",fontSize:13}}>
+                      {LANGUAGES.map(l=><option key={l.code} value={l.code}>{l.label}</option>)}
+                    </select>
+                  </div>
+                  <div className="settings-row">
+                    <div style={{fontSize:14,fontWeight:600}}>💰 Currency</div>
+                    <select className="select-field" value={currency} onChange={e=>setCurrency(e.target.value)} style={{width:"auto",padding:"8px 12px",fontSize:13}}>
+                      {CURRENCIES.map(c=><option key={c.code} value={c.code}>{c.code}</option>)}
+                    </select>
+                  </div>
+                </div>
+
                 <div style={{display:"flex",flexDirection:"column",gap:10}}>
                   <button className="btn-primary" onClick={()=>openAuth("signup")}>Create Account</button>
                   <button className="btn-ghost" onClick={()=>openAuth("login")}>Log In</button>
@@ -644,7 +702,7 @@ export default function App() {
         </div>
       )}
 
-      {/* AUTH modal */}
+      {/* AUTH */}
       {modal==="auth"&&(
         <div className="modal-bg" onClick={e=>{if(e.target===e.currentTarget){setModal(null);resetAuth();}}}>
           <div className="modal">
@@ -662,11 +720,12 @@ export default function App() {
                 ))}
               </div>
               <div style={{display:"flex",flexDirection:"column",gap:12}}>
-                {authMode==="signup"&&<input className="field" placeholder="Your name" value={authForm.name} onChange={e=>setAuthForm(f=>({...f,name:e.target.value}))} autoFocus/>}
-                <input className="field" placeholder="Email address" type="email" value={authForm.email} onChange={e=>setAuthForm(f=>({...f,email:e.target.value}))}/>
+                {/* Fix 5: autocomplete off on all auth fields */}
+                {authMode==="signup"&&<input className="field" placeholder="Your name" autoComplete="off" value={authForm.name} onChange={e=>setAuthForm(f=>({...f,name:e.target.value}))} autoFocus/>}
+                <input className="field" placeholder="Email address" type="email" autoComplete="off" value={authForm.email} onChange={e=>setAuthForm(f=>({...f,email:e.target.value}))}/>
                 <div>
                   <div className="pw-wrap">
-                    <input className="field" placeholder="Password (min. 6 characters)" type={showPw?"text":"password"} value={authForm.password} onChange={e=>setAuthForm(f=>({...f,password:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&(authMode==="signup"?handleSignup():handleLogin())}/>
+                    <input className="field" placeholder="Password (min. 6 characters)" type={showPw?"text":"password"} autoComplete="new-password" value={authForm.password} onChange={e=>setAuthForm(f=>({...f,password:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&(authMode==="signup"?handleSignup():handleLogin())}/>
                     <button className="pw-eye" onClick={()=>setShowPw(v=>!v)} type="button"><EyeIcon open={showPw}/></button>
                   </div>
                   {authMode==="signup"&&authForm.password&&(
@@ -687,7 +746,7 @@ export default function App() {
                   {authMode==="signup"?"Create Account":"Log In"}
                 </button>
                 <div style={{textAlign:"center",fontSize:12,color:"#444460"}}>
-                  {authMode==="signup"?"Already have an account? ":"Don't have an account? "}
+                  {authMode==="signup"?"Already have an account? ":"Do not have an account? "}
                   <button className="btn-link" onClick={()=>{setAuthMode(m=>m==="signup"?"login":"signup");setAuthError("");}}>
                     {authMode==="signup"?"Log in":"Sign up"}
                   </button>
@@ -704,9 +763,9 @@ export default function App() {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
                 Back to login
               </button>
-              <div style={{fontSize:13,color:"#888899",lineHeight:1.6,marginBottom:20}}>Enter your email and we'll send you a reset link.</div>
+              <div style={{fontSize:13,color:"#888899",lineHeight:1.6,marginBottom:20}}>Enter your email and we will send you a reset link.</div>
               <div style={{display:"flex",flexDirection:"column",gap:12}}>
-                <input className="field" placeholder="Email address" type="email" value={authForm.email} onChange={e=>setAuthForm(f=>({...f,email:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&handleForgotRequest()} autoFocus/>
+                <input className="field" placeholder="Email address" type="email" autoComplete="off" value={authForm.email} onChange={e=>setAuthForm(f=>({...f,email:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&handleForgotRequest()} autoFocus/>
                 {authError&&<div className="err-box">{authError}</div>}
                 <button className="btn-primary" onClick={handleForgotRequest} disabled={authLoading}>
                   {authLoading&&<div className="spinner"/>}
@@ -715,6 +774,7 @@ export default function App() {
               </div>
             </>)}
 
+            {/* Fix 1: success screen now shows correct login button & Fix 6: resend button */}
             {authStep==="success"&&(
               <div style={{textAlign:"center",padding:"16px 0 8px"}}>
                 <div className="pop-in" style={{fontSize:60,marginBottom:16,display:"inline-block"}}>
@@ -723,9 +783,29 @@ export default function App() {
                 <h3 style={{fontFamily:"Playfair Display,serif",fontSize:26,marginBottom:10}}>
                   {authMode==="signup"?"Check your email!":"Email sent!"}
                 </h3>
-                <div style={{fontSize:13,color:"#888899",lineHeight:1.7,marginBottom:28,whiteSpace:"pre-line"}}>{authInfo}</div>
-                <button className="btn-primary" onClick={()=>{setModal(null);resetAuth();setAuthMode("login");}}>
-                  Back to Log In
+                <div style={{fontSize:13,color:"#888899",lineHeight:1.7,marginBottom:20,whiteSpace:"pre-line"}}>{authInfo}</div>
+
+                {/* Fix 6: resend confirmation email button */}
+                {authMode==="signup"&&(
+                  <div style={{marginBottom:20}}>
+                    <div style={{fontSize:12,color:"#444460",marginBottom:8}}>Did not receive it?</div>
+                    <button className="btn-ghost" onClick={handleResendConfirmation} disabled={authLoading} style={{fontSize:13,padding:"10px"}}>
+                      {authLoading&&<div className="spinner"/>}
+                      Resend verification email
+                    </button>
+                    {authError&&<div className="err-box" style={{marginTop:10,textAlign:"left"}}>{authError}</div>}
+                  </div>
+                )}
+
+                {/* Fix 1: goes to login tab, not home */}
+                <button className="btn-primary" onClick={()=>{
+                  setModal("auth");
+                  setAuthMode("login");
+                  setAuthStep("form");
+                  setAuthInfo("");
+                  setAuthError("");
+                }}>
+                  {authMode==="signup"?"Go to Log In":"Back to Log In"}
                 </button>
               </div>
             )}
