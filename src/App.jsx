@@ -811,16 +811,23 @@ export default function App() {
     setAuthLoading(true);
     const { data, error } = await supabase.auth.signInWithPassword({ email: authForm.email.trim(), password: authForm.password });
     setAuthLoading(false);
-    // Fix 7: detect deleted account vs wrong password
-    if (error) {
-      if (error.message.includes("Invalid login credentials")) {
-        // Check if account exists at all
-        const { data: methods } = await supabase.auth.signInWithOtp({ email: authForm.email.trim(), options: { shouldCreateUser: false } });
-        return setAuthError(t.incorrectPassword);
-      }
-      return setAuthError(t.incorrectPassword);
-    }
+    if (error) return setAuthError(t.incorrectPassword);
     if (!data.user) return setAuthError(t.accountDeleted);
+
+    // Create a free subscription row if one does not exist yet
+    const { data: existingSub } = await supabase
+      .from("subscriptions")
+      .select("id")
+      .eq("user_id", data.user.id)
+      .single();
+    if (!existingSub) {
+      await supabase.from("subscriptions").insert({
+        user_id: data.user.id,
+        plan: "free",
+        updated_at: new Date().toISOString(),
+      });
+    }
+
     setModal(null); resetAuth();
   };
 
