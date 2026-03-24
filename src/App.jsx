@@ -634,12 +634,38 @@ const EyeIcon = ({open}) => open
   ? <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
   : <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>;
 
-const CSS = `
+// Theme definitions
+const DARK_THEME = {
+  bg:"#0A0A0F", bgCard:"#11111A", bgInput:"#13131C", bgModal:"#0F0F1A",
+  bgTab:"#1E1E2A", bgHighlight:"#1A1A26",
+  border:"#2A2A3A", borderLight:"#1E1E2A", borderFaint:"#1A1A26",
+  text:"#F0EBE1", textMuted:"#666680", textFaint:"#444460", textVeryFaint:"#333350",
+  orbOpacity:".15", navBg:"rgba(10,10,15,.9)",
+  ringBg:"#1E1E2A", modalOverlay:"rgba(0,0,0,.78)",
+  errBg:"#FF4D4D14", errBorder:"#FF4D4D44", errText:"#FF7070",
+  infoBg:"#12122A", infoBorder:"#3A3A66", infoText:"#A0A0D0",
+  settingsBorder:"#1A1A26",
+};
+
+const LIGHT_THEME = {
+  bg:"#F5F0E8", bgCard:"#FFFDF8", bgInput:"#F0EBE0", bgModal:"#FDFAF4",
+  bgTab:"#EDE8DC", bgHighlight:"#EDE8DC",
+  border:"#D4CCB8", borderLight:"#DDD8CC", borderFaint:"#E5E0D4",
+  text:"#1A1410", textMuted:"#6B6355", textFaint:"#8C8070", textVeryFaint:"#B0A898",
+  orbOpacity:".08", navBg:"rgba(245,240,232,.92)",
+  ringBg:"#DDD8CC", modalOverlay:"rgba(0,0,0,.5)",
+  errBg:"#FF4D4D14", errBorder:"#FF4D4D44", errText:"#CC2200",
+  infoBg:"#EDE8DC", infoBorder:"#C4BCAA", infoText:"#5A5040",
+  settingsBorder:"#DDD8CC",
+};
+
+function getCSS(th) {
+  return `
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&family=Playfair+Display:wght@400;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 ::-webkit-scrollbar{width:0}
-body{background:#0A0A0F}
-.orb{position:fixed;border-radius:50%;filter:blur(80px);opacity:.15;pointer-events:none;animation:float 8s ease-in-out infinite}
+body{background:${th.bg};transition:background .3s}
+.orb{position:fixed;border-radius:50%;filter:blur(80px);opacity:${th.orbOpacity};pointer-events:none;animation:float 8s ease-in-out infinite}
 @keyframes float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-28px) scale(1.05)}}
 @keyframes slideUp{from{transform:translateY(28px);opacity:0}to{transform:translateY(0);opacity:1}}
 @keyframes tickBounce{0%{transform:scale(1)}40%{transform:scale(1.4)}100%{transform:scale(1)}}
@@ -650,22 +676,22 @@ body{background:#0A0A0F}
 .fade-in{animation:fadeIn .3s ease forwards}
 .pop{animation:tickBounce .5s cubic-bezier(.34,1.56,.64,1)}
 .pop-in{animation:popIn .5s cubic-bezier(.34,1.56,.64,1) forwards}
-.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
-.field{background:#13131C;border:1.5px solid #2A2A3A;border-radius:14px;color:#F0EBE1;font-size:15px;font-family:'DM Sans',sans-serif;padding:13px 16px;width:100%;outline:none;transition:border-color .2s}
+.spinner{width:18px;height:18px;border:2px solid rgba(128,128,128,.3);border-top-color:${th.text};border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
+.field{background:${th.bgInput};border:1.5px solid ${th.border};border-radius:14px;color:${th.text};font-size:15px;font-family:'DM Sans',sans-serif;padding:13px 16px;width:100%;outline:none;transition:border-color .2s,background .3s,color .3s}
 .field:focus{border-color:#5A5AFF}
-.field::placeholder{color:#444460}
-.select-field{background:#13131C;border:1.5px solid #2A2A3A;border-radius:14px;color:#F0EBE1;font-size:14px;font-family:'DM Sans',sans-serif;padding:10px 14px;outline:none;transition:border-color .2s;appearance:none;cursor:pointer}
+.field::placeholder{color:${th.textFaint}}
+.select-field{background:${th.bgInput};border:1.5px solid ${th.border};border-radius:14px;color:${th.text};font-size:14px;font-family:'DM Sans',sans-serif;padding:10px 14px;outline:none;transition:border-color .2s,background .3s;appearance:none;cursor:pointer}
 .select-field:focus{border-color:#5A5AFF}
 .btn-primary{background:linear-gradient(135deg,#5A5AFF,#A855F7);border:none;border-radius:14px;color:#fff;font-size:15px;font-weight:600;font-family:'DM Sans',sans-serif;padding:14px;width:100%;cursor:pointer;transition:opacity .2s,transform .15s;letter-spacing:.3px;display:flex;align-items:center;justify-content:center;gap:8px}
 .btn-primary:hover{opacity:.9;transform:translateY(-1px)}
 .btn-primary:active{transform:scale(.98)}
 .btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.btn-ghost{background:none;border:1.5px solid #2A2A3A;border-radius:14px;color:#F0EBE1;font-size:15px;font-family:'DM Sans',sans-serif;padding:13px;width:100%;cursor:pointer;transition:border-color .2s,background .2s;display:flex;align-items:center;justify-content:center;gap:8px}
-.btn-ghost:hover{border-color:#5A5AFF;background:#1A1A2A}
+.btn-ghost{background:none;border:1.5px solid ${th.border};border-radius:14px;color:${th.text};font-size:15px;font-family:'DM Sans',sans-serif;padding:13px;width:100%;cursor:pointer;transition:border-color .2s,background .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-ghost:hover{border-color:#5A5AFF;background:${th.bgHighlight}}
 .btn-link{background:none;border:none;color:#5A5AFF;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;padding:0;transition:opacity .2s}
 .btn-link:hover{opacity:.75}
-.nav-btn{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;color:#555570;font-size:11px;font-family:'DM Sans',sans-serif;transition:color .2s;padding:8px 16px}
-.nav-btn.active{color:#F0EBE1}
+.nav-btn{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;color:${th.textMuted};font-size:11px;font-family:'DM Sans',sans-serif;transition:color .2s;padding:8px 16px}
+.nav-btn.active{color:${th.text}}
 .nav-btn svg{transition:transform .2s}
 .nav-btn:hover svg,.nav-btn.active svg{transform:translateY(-2px)}
 .habit-row{animation:slideUp .4s ease forwards;transition:background .2s,transform .15s}
@@ -674,29 +700,30 @@ body{background:#0A0A0F}
 .check-btn:hover{transform:scale(1.12)}
 .tag{border-radius:8px;padding:8px 11px;cursor:pointer;font-size:20px;transition:transform .15s;border:2px solid transparent}
 .tag:hover{transform:scale(1.15)}
-.tag.selected{border-color:#F0EBE1;transform:scale(1.1);box-shadow:0 0 12px rgba(255,255,255,.2)}
-.ring-bg{fill:none;stroke:#1E1E2A;stroke-width:8}
+.tag.selected{border-color:${th.text};transform:scale(1.1);box-shadow:0 0 12px rgba(128,128,128,.2)}
+.ring-bg{fill:none;stroke:${th.ringBg};stroke-width:8}
 .ring-fill{fill:none;stroke-width:8;stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset .8s cubic-bezier(.4,0,.2,1)}
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(8px);z-index:100;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .2s}
-.modal{background:#0F0F1A;border-radius:28px 28px 0 0;padding:28px 24px 52px;width:100%;max-width:430px;border-top:1px solid #2A2A3A;animation:slideUp .3s ease;max-height:90vh;overflow-y:auto}
+.modal-bg{position:fixed;inset:0;background:${th.modalOverlay};backdrop-filter:blur(8px);z-index:100;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .2s}
+.modal{background:${th.bgModal};border-radius:28px 28px 0 0;padding:28px 24px 52px;width:100%;max-width:430px;border-top:1px solid ${th.border};animation:slideUp .3s ease;max-height:90vh;overflow-y:auto}
 .pro-badge{background:linear-gradient(135deg,#FFD166,#FF8C42);color:#0A0A0F;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;letter-spacing:.5px}
 .streak-day{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;transition:all .2s;border:none;font-family:'DM Sans',sans-serif}
-.del-btn{background:none;border:none;cursor:pointer;color:#333350;font-size:18px;transition:color .2s,transform .15s;padding:4px 8px}
+.del-btn{background:none;border:none;cursor:pointer;color:${th.textVeryFaint};font-size:18px;transition:color .2s,transform .15s;padding:4px 8px}
 .del-btn:hover{color:#FF4D4D;transform:scale(1.2)}
-.tab{background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 16px;border-radius:99px;transition:all .2s;color:#666680}
-.tab.active{background:#1E1E2A;color:#F0EBE1;font-weight:600}
+.tab{background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 16px;border-radius:99px;transition:all .2s;color:${th.textMuted}}
+.tab.active{background:${th.bgTab};color:${th.text};font-weight:600}
 .pw-wrap{position:relative;width:100%}
 .pw-wrap .field{padding-right:48px}
-.pw-eye{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#444460;transition:color .2s;display:flex;align-items:center;padding:4px}
-.pw-eye:hover{color:#A0A0D0}
-.info-box{background:#12122A;border:1px solid #3A3A66;border-radius:12px;padding:12px 14px;font-size:13px;color:#A0A0D0;line-height:1.6;white-space:pre-line}
-.err-box{background:#FF4D4D14;border:1px solid #FF4D4D44;border-radius:12px;padding:11px 14px;font-size:13px;color:#FF7070;line-height:1.5}
-.step-back{background:none;border:none;cursor:pointer;color:#555570;font-size:13px;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:5px;padding:0 0 18px 0;transition:color .2s}
-.step-back:hover{color:#F0EBE1}
+.pw-eye{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:${th.textFaint};transition:color .2s;display:flex;align-items:center;padding:4px}
+.pw-eye:hover{color:${th.textMuted}}
+.info-box{background:${th.infoBg};border:1px solid ${th.infoBorder};border-radius:12px;padding:12px 14px;font-size:13px;color:${th.infoText};line-height:1.6;white-space:pre-line}
+.err-box{background:${th.errBg};border:1px solid ${th.errBorder};border-radius:12px;padding:11px 14px;font-size:13px;color:${th.errText};line-height:1.5}
+.step-back{background:none;border:none;cursor:pointer;color:${th.textMuted};font-size:13px;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:5px;padding:0 0 18px 0;transition:color .2s}
+.step-back:hover{color:${th.text}}
 .strength-bar{height:4px;border-radius:99px;transition:all .4s;margin-top:6px}
-.settings-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid #1A1A26;gap:12px}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid ${th.settingsBorder};gap:12px}
 .settings-row:last-child{border-bottom:none}
 `;
+}
 
 export default function App() {
   const [user,    setUser]    = useState(null);
@@ -715,10 +742,13 @@ export default function App() {
 
   const [language, setLanguage] = useState(() => localStorage.getItem("pulse_lang") || "en");
   const [currency, setCurrency] = useState(() => localStorage.getItem("pulse_currency") || "USD");
+  const [theme,    setTheme]    = useState(() => localStorage.getItem("pulse_theme") || "dark");
 
   const today = todayKey();
   const t = T[language] || T.en;
   const prices = PRICES[currency] || PRICES.USD;
+  const th = theme === "light" ? LIGHT_THEME : DARK_THEME;
+  const CSS = getCSS(th);
 
   const [form, setForm] = useState({ name:"", icon:"🔥", color:COLORS[0] });
 
@@ -761,6 +791,7 @@ export default function App() {
 
   useEffect(() => { localStorage.setItem("pulse_lang", language); }, [language]);
   useEffect(() => { localStorage.setItem("pulse_currency", currency); }, [currency]);
+  useEffect(() => { localStorage.setItem("pulse_theme", theme); document.body.style.background = th.bg; }, [theme]);
 
   const loadData = async (userId) => {
     setLoading(true);
@@ -929,11 +960,11 @@ export default function App() {
   const userName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "You";
 
   const SettingsBlock = () => (
-    <div style={{background:"#13131C",borderRadius:16,padding:"4px 16px",marginBottom:14}}>
+    <div style={{background:th.bgCard,border:`1px solid ${th.border}`,borderRadius:16,padding:"4px 16px",marginBottom:14}}>
       <div className="settings-row">
         <div style={{flex:1}}>
-          <div style={{fontSize:14,fontWeight:600}}>🌐 {t.language}</div>
-          <div style={{fontSize:11,color:"#666680",marginTop:2}}>{t.appLanguage}</div>
+          <div style={{fontSize:14,fontWeight:600,color:th.text}}>🌐 {t.language}</div>
+          <div style={{fontSize:11,color:th.textMuted,marginTop:2}}>{t.appLanguage}</div>
         </div>
         <select className="select-field" value={language} onChange={e=>setLanguage(e.target.value)}>
           {LANGUAGES.map(l=><option key={l.code} value={l.code}>{l.label}</option>)}
@@ -941,18 +972,27 @@ export default function App() {
       </div>
       <div className="settings-row">
         <div style={{flex:1}}>
-          <div style={{fontSize:14,fontWeight:600}}>💰 {t.currency}</div>
-          <div style={{fontSize:11,color:"#666680",marginTop:2}}>{t.pricingCurrency}</div>
+          <div style={{fontSize:14,fontWeight:600,color:th.text}}>💰 {t.currency}</div>
+          <div style={{fontSize:11,color:th.textMuted,marginTop:2}}>{t.pricingCurrency}</div>
         </div>
         <select className="select-field" value={currency} onChange={e=>setCurrency(e.target.value)}>
           {CURRENCIES.map(c=><option key={c.code} value={c.code}>{c.code}</option>)}
         </select>
       </div>
+      <div className="settings-row">
+        <div style={{flex:1}}>
+          <div style={{fontSize:14,fontWeight:600,color:th.text}}>{theme==="dark"?"🌙 Dark Mode":"☀️ Light Mode"}</div>
+          <div style={{fontSize:11,color:th.textMuted,marginTop:2}}>{theme==="dark"?"Switch to light mode":"Switch to dark mode"}</div>
+        </div>
+        <button onClick={()=>setTheme(t=>t==="dark"?"light":"dark")} style={{background:theme==="dark"?"#1E1E2A":"#DDD8CC",border:`1.5px solid ${th.border}`,borderRadius:99,width:48,height:26,cursor:"pointer",position:"relative",transition:"background .3s",flexShrink:0}}>
+          <div style={{position:"absolute",top:3,left:theme==="dark"?3:23,width:18,height:18,borderRadius:"50%",background:theme==="dark"?"#5A5AFF":"#FFD166",transition:"left .3s",boxShadow:"0 1px 4px rgba(0,0,0,.3)"}}/>
+        </button>
+      </div>
     </div>
   );
 
   if (loading) return (
-    <div style={{minHeight:"100vh",background:"#0A0A0F",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:16}}>
+    <div style={{minHeight:"100vh",background:th.bg,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:16}}>
       <style>{CSS}</style>
       <div style={{fontFamily:"Playfair Display,serif",fontSize:28,color:"#F0EBE1",background:"linear-gradient(135deg,#F0EBE1,#A0A0C8)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>{t.appName}</div>
       <div className="spinner" style={{width:28,height:28}}/>
@@ -960,7 +1000,7 @@ export default function App() {
   );
 
   return (
-    <div style={{minHeight:"100vh",background:"#0A0A0F",fontFamily:"'DM Sans',sans-serif",color:"#F0EBE1",display:"flex",flexDirection:"column",alignItems:"center",paddingBottom:110,position:"relative",overflow:"hidden"}}>
+    <div style={{minHeight:"100vh",background:th.bg,fontFamily:"'DM Sans',sans-serif",color:th.text,transition:"background .3s,color .3s",display:"flex",flexDirection:"column",alignItems:"center",paddingBottom:110,position:"relative",overflow:"hidden"}}>
       <style>{CSS}</style>
       <div className="orb" style={{width:380,height:380,background:"#5A5AFF",top:-80,left:-100}}/>
       <div className="orb" style={{width:280,height:280,background:"#A855F7",top:220,right:-60,animationDelay:"3s"}}/>
@@ -969,7 +1009,7 @@ export default function App() {
       <div style={{width:"100%",maxWidth:430,padding:"0 20px",flex:1}}>
         <div style={{paddingTop:56,paddingBottom:24,display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
           <div>
-            <div style={{fontSize:12,color:"#666680",letterSpacing:"2px",textTransform:"uppercase",marginBottom:5}}>
+            <div style={{fontSize:12,color:th.textMuted,letterSpacing:"2px",textTransform:"uppercase",marginBottom:5}}>
               {new Date().toLocaleDateString(language === "en" ? "en-US" : language, {weekday:"long",month:"long",day:"numeric"})}
             </div>
             <h1 style={{fontFamily:"Playfair Display,serif",fontSize:32,fontWeight:700,lineHeight:1.1,background:"linear-gradient(135deg,#F0EBE1 30%,#A0A0C8 100%)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
@@ -986,11 +1026,11 @@ export default function App() {
         </div>
 
         {!user && (
-          <div style={{background:"#11111A",border:"1px solid #2A2A3A",borderRadius:18,padding:"18px 20px",marginBottom:22,display:"flex",gap:14,alignItems:"center"}}>
+          <div style={{background:th.bgCard,border:`1px solid ${th.border}`,borderRadius:18,padding:"18px 20px",marginBottom:22,display:"flex",gap:14,alignItems:"center"}}>
             <span style={{fontSize:28}}>👋</span>
             <div style={{flex:1}}>
               <div style={{fontWeight:600,fontSize:15,marginBottom:3}}>{t.signInTitle}</div>
-              <div style={{fontSize:12,color:"#666680"}}>{t.signInDesc}</div>
+              <div style={{fontSize:12,color:th.textMuted}}>{t.signInDesc}</div>
             </div>
             <button onClick={()=>openAuth("signup")} style={{background:"linear-gradient(135deg,#5A5AFF,#A855F7)",border:"none",borderRadius:10,padding:"8px 14px",fontSize:13,fontWeight:700,color:"#fff",cursor:"pointer",whiteSpace:"nowrap"}}>{t.signUp}</button>
           </div>
@@ -999,7 +1039,7 @@ export default function App() {
         {view==="home"&&(
           <div className="slide-up">
             {habits.length>0&&(
-              <div style={{display:"flex",alignItems:"center",gap:20,background:"#11111A",borderRadius:22,padding:"18px 22px",marginBottom:24,border:"1px solid #1E1E2A"}}>
+              <div style={{display:"flex",alignItems:"center",gap:20,background:th.bgCard,borderRadius:22,padding:"18px 22px",marginBottom:24,border:`1px solid ${th.borderLight}`}}>
                 <div style={{position:"relative",width:80,height:80,flexShrink:0}}>
                   <svg width="80" height="80" viewBox="0 0 80 80">
                     <circle className="ring-bg" cx="40" cy="40" r="32"/>
@@ -1034,14 +1074,14 @@ export default function App() {
                 {habits.map((h,i)=>{
                   const done=!!logs[today]?.[h.id], streak=getStreak(logs,h.id), last7=getLast7(logs,h.id);
                   return (
-                    <div key={h.id} className="habit-row" style={{animationDelay:`${i*55}ms`,background:done?`${h.color}18`:"#11111A",border:`1.5px solid ${done?h.color+"55":"#1E1E2A"}`,borderRadius:20,padding:"14px 16px",display:"flex",alignItems:"center",gap:12}}>
-                      <button className={`check-btn ${animId===h.id?"pop":""}`} onClick={()=>toggleHabit(h.id)} style={{width:44,height:44,borderRadius:13,background:done?h.color:"#1A1A26",boxShadow:done?`0 4px 18px ${h.color}55`:"none",fontSize:done?18:20,flexShrink:0}}>
+                    <div key={h.id} className="habit-row" style={{animationDelay:`${i*55}ms`,background:done?`${h.color}18`:th.bgCard,border:`1.5px solid ${done?h.color+"55":th.borderLight}`,borderRadius:20,padding:"14px 16px",display:"flex",alignItems:"center",gap:12}}>
+                      <button className={`check-btn ${animId===h.id?"pop":""}`} onClick={()=>toggleHabit(h.id)} style={{width:44,height:44,borderRadius:13,background:done?h.color:th.bgHighlight,boxShadow:done?`0 4px 18px ${h.color}55`:"none",fontSize:done?18:20,flexShrink:0}}>
                         {done?"✓":h.icon}
                       </button>
                       <div style={{flex:1,minWidth:0}}>
-                        <div style={{fontWeight:600,fontSize:15,marginBottom:4,textDecoration:done?"line-through":"none",color:done?"#666680":"#F0EBE1"}}>{h.name}</div>
+                        <div style={{fontWeight:600,fontSize:15,marginBottom:4,textDecoration:done?"line-through":"none",color:done?th.textMuted:th.text}}>{h.name}</div>
                         <div style={{display:"flex",gap:4,alignItems:"center"}}>
-                          {last7.map((d,j)=><div key={j} style={{width:8,height:8,borderRadius:"50%",background:d?h.color:"#2A2A3A",transition:"background .3s"}}/>)}
+                          {last7.map((d,j)=><div key={j} style={{width:8,height:8,borderRadius:"50%",background:d?h.color:th.border,transition:"background .3s"}}/>)}
                           {streak>0&&<span style={{fontSize:11,color:h.color,marginLeft:5,fontWeight:600}}>🔥 {streak}{t.dayStreak.split(" ")[0]}</span>}
                         </div>
                       </div>
@@ -1056,7 +1096,7 @@ export default function App() {
               </div>
             )}
             <button onClick={()=>{if(atLimit){setModal("upgrade");}else{setForm({name:"",icon:"🔥",color:COLORS[0]});setEditTarget(null);setModal("add");}}}
-              style={{marginTop:20,width:"100%",background:"#11111A",border:"1.5px dashed #2A2A3A",borderRadius:18,padding:16,color:"#555570",fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,transition:"border-color .2s,color .2s"}}
+              style={{marginTop:20,width:"100%",background:th.bgCard,border:`1.5px dashed ${th.border}`,borderRadius:18,padding:16,color:"#555570",fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,transition:"border-color .2s,color .2s"}}
               onMouseEnter={e=>{e.currentTarget.style.borderColor="#5A5AFF";e.currentTarget.style.color="#F0EBE1"}}
               onMouseLeave={e=>{e.currentTarget.style.borderColor="#2A2A3A";e.currentTarget.style.color="#555570"}}>
               <span style={{fontSize:20}}>+</span> {t.addHabit} {atLimit&&<span className="pro-badge">PRO</span>}
@@ -1068,7 +1108,7 @@ export default function App() {
           <div className="slide-up">
             <h2 style={{fontFamily:"Playfair Display,serif",fontSize:26,marginBottom:22}}>{t.statsTitle}</h2>
             {!isPro?(
-              <div style={{background:"#11111A",border:"1px solid #2A2A3A",borderRadius:22,padding:28,textAlign:"center"}}>
+              <div style={{background:th.bgCard,border:`1px solid ${th.border}`,borderRadius:22,padding:28,textAlign:"center"}}>
                 <div style={{fontSize:40,marginBottom:12}}>📊</div>
                 <div style={{fontFamily:"Playfair Display,serif",fontSize:20,marginBottom:8}}>{t.statsProOnly}</div>
                 <div style={{fontSize:13,color:"#666680",marginBottom:20,lineHeight:1.6}}>{t.statsProDesc}</div>
@@ -1082,7 +1122,7 @@ export default function App() {
                   const streak=getStreak(logs,h.id), total=Object.values(logs).filter(d=>d[h.id]).length;
                   const last30=getLast30Keys().map(k=>!!logs[k]?.[h.id]), rate=Math.round((last30.filter(Boolean).length/30)*100);
                   return (
-                    <div key={h.id} style={{background:"#11111A",border:"1px solid #1E1E2A",borderRadius:20,padding:"20px"}}>
+                    <div key={h.id} style={{background:th.bgCard,border:`1px solid ${th.borderLight}`,borderRadius:20,padding:"20px"}}>
                       <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
                         <span style={{fontSize:22}}>{h.icon}</span>
                         <div style={{flex:1}}><div style={{fontWeight:600,fontSize:15}}>{h.name}</div><div style={{fontSize:11,color:"#666680"}}>{total} {t.totalCompletions}</div></div>
@@ -1090,10 +1130,10 @@ export default function App() {
                       </div>
                       <div style={{marginBottom:10}}>
                         <div style={{fontSize:11,color:"#555570",marginBottom:7}}>{t.lastThirtyDays}</div>
-                        <div style={{display:"flex",gap:3,flexWrap:"wrap"}}>{last30.map((d,i)=><div key={i} style={{width:15,height:15,borderRadius:4,background:d?h.color:"#1E1E2A"}}/>)}</div>
+                        <div style={{display:"flex",gap:3,flexWrap:"wrap"}}>{last30.map((d,i)=><div key={i} style={{width:15,height:15,borderRadius:4,background:d?h.color:th.borderLight}}/>)}</div>
                       </div>
                       <div style={{display:"flex",alignItems:"center",gap:8}}>
-                        <div style={{height:5,flex:1,background:"#1E1E2A",borderRadius:99}}><div style={{height:"100%",width:`${rate}%`,background:`linear-gradient(90deg,${h.color},${h.color}AA)`,borderRadius:99,transition:"width .8s"}}/></div>
+                        <div style={{height:5,flex:1,background:th.borderLight,borderRadius:99}}><div style={{height:"100%",width:`${rate}%`,background:`linear-gradient(90deg,${h.color},${h.color}AA)`,borderRadius:99,transition:"width .8s"}}/></div>
                         <span style={{fontSize:12,color:h.color,fontWeight:600}}>{rate}%</span>
                       </div>
                     </div>
@@ -1108,7 +1148,7 @@ export default function App() {
 
       {/* Legal Footer */}
       <div style={{width:"100%",maxWidth:430,padding:"24px 20px 120px",textAlign:"center"}}>
-        <div style={{fontSize:11,color:"#333350",marginBottom:10}}>
+        <div style={{fontSize:11,color:th.textVeryFaint,marginBottom:10}}>
           {"\u00a9 "}{new Date().getFullYear()}{" Pulse. All rights reserved."}
         </div>
         <div style={{display:"flex",justifyContent:"center",flexWrap:"wrap",gap:"6px 16px"}}>
@@ -1119,7 +1159,7 @@ export default function App() {
             {label:"Cookie Policy",    href:"https://pulse-app-taupe.vercel.app/cookies"},
           ].map(({label,href})=>(
             <a key={label} href={href} target="_blank" rel="noopener noreferrer"
-              style={{fontSize:11,color:"#444460",textDecoration:"none",transition:"color .2s"}}
+              style={{fontSize:11,color:th.textFaint,textDecoration:"none",transition:"color .2s"}}
               onMouseEnter={e=>e.target.style.color="#A0A0C8"}
               onMouseLeave={e=>e.target.style.color="#444460"}>
               {label}
@@ -1129,7 +1169,7 @@ export default function App() {
       </div>
 
       {/* Nav */}
-      <div style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:430,background:"rgba(10,10,15,.9)",backdropFilter:"blur(20px)",borderTop:"1px solid #1E1E2A",display:"flex",justifyContent:"space-around",padding:"10px 0 20px"}}>
+      <div style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:430,background:th.navBg,backdropFilter:"blur(20px)",borderTop:`1px solid ${th.border}`,display:"flex",justifyContent:"space-around",padding:"10px 0 20px"}}>
         <button className={`nav-btn ${view==="home"?"active":""}`} onClick={()=>setView("home")}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9L12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           {t.today}
@@ -1146,13 +1186,13 @@ export default function App() {
           <div className="modal">
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:22}}>
               <h3 style={{fontFamily:"Playfair Display,serif",fontSize:24}}>{modal==="edit"?t.editHabit:t.newHabit}</h3>
-              <button onClick={()=>{setModal(null);setEditTarget(null);}} style={{background:"none",border:"none",color:"#666680",fontSize:22,cursor:"pointer"}}>×</button>
+              <button onClick={()=>{setModal(null);setEditTarget(null);}} style={{background:"none",border:"none",color:th.textMuted,fontSize:22,cursor:"pointer"}}>×</button>
             </div>
             <div style={{display:"flex",flexDirection:"column",gap:16}}>
               <input className="field" placeholder={t.habitName} value={form.name} autoComplete="off" onChange={e=>setForm(f=>({...f,name:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&saveHabit()} autoFocus/>
               <div>
                 <div style={{fontSize:11,color:"#666680",letterSpacing:"1.5px",textTransform:"uppercase",marginBottom:8}}>{t.icon}</div>
-                <div style={{display:"flex",flexWrap:"wrap",gap:7}}>{ICONS.map(ic=><button key={ic} className={`tag ${form.icon===ic?"selected":""}`} style={{background:form.icon===ic?"#1E1E30":"#13131C"}} onClick={()=>setForm(f=>({...f,icon:ic}))}>{ic}</button>)}</div>
+                <div style={{display:"flex",flexWrap:"wrap",gap:7}}>{ICONS.map(ic=><button key={ic} className={`tag ${form.icon===ic?"selected":""}`} style={{background:form.icon===ic?th.bgTab:th.bgInput}} onClick={()=>setForm(f=>({...f,icon:ic}))}>{ic}</button>)}</div>
               </div>
               <div>
                 <div style={{fontSize:11,color:"#666680",letterSpacing:"1.5px",textTransform:"uppercase",marginBottom:8}}>{t.color}</div>
@@ -1175,18 +1215,18 @@ export default function App() {
             <div className="modal">
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
                 <div><h3 style={{fontFamily:"Playfair Display,serif",fontSize:22}}>{h.icon} {t.editStreak}</h3><div style={{fontSize:12,color:"#666680",marginTop:2}}>{t.tapDayToggle}</div></div>
-                <button onClick={()=>setModal(null)} style={{background:"none",border:"none",color:"#666680",fontSize:22,cursor:"pointer"}}>×</button>
+                <button onClick={()=>setModal(null)} style={{background:"none",border:"none",color:th.textMuted,fontSize:22,cursor:"pointer"}}>×</button>
               </div>
               <div style={{marginTop:18}}>
                 <div style={{fontSize:11,color:"#555570",letterSpacing:"1px",textTransform:"uppercase",marginBottom:10}}>{t.lastThirtyDays}</div>
                 <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
                   {getLast30Keys().map(k=>{
                     const done=!!logs[k]?.[h.id], label=new Date(k+"T12:00:00").getDate();
-                    return <button key={k} className="streak-day" onClick={()=>toggleLogDay(h.id,k)} style={{background:done?h.color:"#1A1A26",color:done?"#fff":"#555570",border:`1.5px solid ${done?h.color:"#2A2A3A"}`,fontWeight:done?700:400,boxShadow:done?`0 2px 8px ${h.color}44`:"none"}}>{label}</button>;
+                    return <button key={k} className="streak-day" onClick={()=>toggleLogDay(h.id,k)} style={{background:done?h.color:th.bgHighlight,color:done?"#fff":th.textMuted,border:`1.5px solid ${done?h.color:th.border}`,fontWeight:done?700:400,boxShadow:done?`0 2px 8px ${h.color}44`:"none"}}>{label}</button>;
                   })}
                 </div>
               </div>
-              <div style={{marginTop:18,background:"#13131C",borderRadius:14,padding:"12px 16px",display:"flex",justifyContent:"space-between"}}>
+              <div style={{marginTop:18,background:th.bgInput,borderRadius:14,padding:"12px 16px",display:"flex",justifyContent:"space-between"}}>
                 {[{v:getStreak(logs,h.id),c:h.color,l:t.currentStreak},{v:Object.values(logs).filter(d=>d[h.id]).length,c:"#F0EBE1",l:t.totalDays},{v:`${Math.round((getLast30Keys().filter(k=>logs[k]?.[h.id]).length/30)*100)}%`,c:"#06D6A0",l:t.thirtyDayRate}].map(({v,c,l})=>(
                   <div key={l} style={{textAlign:"center"}}><div style={{fontSize:20,fontWeight:700,color:c}}>{v}</div><div style={{fontSize:11,color:"#666680"}}>{l}</div></div>
                 ))}
@@ -1202,7 +1242,7 @@ export default function App() {
           <div className="modal">
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
               <h3 style={{fontFamily:"Playfair Display,serif",fontSize:26}}>{t.upgradeTitle}</h3>
-              <button onClick={()=>setModal(null)} style={{background:"none",border:"none",color:"#666680",fontSize:22,cursor:"pointer"}}>×</button>
+              <button onClick={()=>setModal(null)} style={{background:"none",border:"none",color:th.textMuted,fontSize:22,cursor:"pointer"}}>×</button>
             </div>
             <p style={{fontSize:13,color:"#666680",marginBottom:22}}>{t.unlockPotential}</p>
             <div style={{display:"flex",flexDirection:"column",gap:12,marginBottom:24}}>
@@ -1211,7 +1251,7 @@ export default function App() {
               ))}
             </div>
             <div style={{display:"flex",gap:10,marginBottom:16}}>
-              <div style={{flex:1,background:"#13131C",border:"1.5px solid #2A2A3A",borderRadius:16,padding:"16px 14px",textAlign:"center"}}>
+              <div style={{flex:1,background:th.bgInput,border:`1.5px solid ${th.border}`,borderRadius:16,padding:"16px 14px",textAlign:"center"}}>
                 <div style={{fontSize:11,color:"#666680",marginBottom:4}}>{t.monthly}</div>
                 <div style={{fontSize:24,fontWeight:700}}>{prices.monthly}</div>
                 <div style={{fontSize:11,color:"#666680"}}>{t.perMonth}</div>
@@ -1248,16 +1288,16 @@ export default function App() {
           <div className="modal">
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
               <h3 style={{fontFamily:"Playfair Display,serif",fontSize:24}}>{t.account}</h3>
-              <button onClick={()=>{setModal(null);setConfirmDelete(false);}} style={{background:"none",border:"none",color:"#666680",fontSize:22,cursor:"pointer"}}>×</button>
+              <button onClick={()=>{setModal(null);setConfirmDelete(false);}} style={{background:"none",border:"none",color:th.textMuted,fontSize:22,cursor:"pointer"}}>×</button>
             </div>
             {user?(
               <div>
-                <div style={{display:"flex",alignItems:"center",gap:16,background:"#13131C",borderRadius:18,padding:"18px 20px",marginBottom:14}}>
+                <div style={{display:"flex",alignItems:"center",gap:16,background:th.bgInput,borderRadius:18,padding:"18px 20px",marginBottom:14}}>
                   <div style={{width:52,height:52,borderRadius:"50%",background:"linear-gradient(135deg,#5A5AFF,#A855F7)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,fontWeight:700,flexShrink:0,boxShadow:"0 0 18px #5A5AFF55"}}>
                     {userName[0].toUpperCase()}
                   </div>
                   <div>
-                    <div style={{fontWeight:600,fontSize:16}}>{userName}</div>
+                    <div style={{fontWeight:600,fontSize:16,color:th.text}}>{userName}</div>
                     <div style={{fontSize:12,color:"#666680"}}>{user.email}</div>
                     <div style={{marginTop:5,display:"flex",gap:6,flexWrap:"wrap"}}>
                       {isPro?<span style={{background:"linear-gradient(135deg,#FFD166,#FF8C42)",color:"#0A0A0F",fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:99}}>✦ PRO</span>:<span style={{background:"#1E1E2A",color:"#888898",fontSize:11,padding:"2px 8px",borderRadius:99}}>{t.freePlanBadge}</span>}
@@ -1268,7 +1308,7 @@ export default function App() {
                 <SettingsBlock/>
                 <div style={{display:"flex",flexDirection:"column",gap:10}}>
                   {!isPro&&<button className="btn-primary" onClick={()=>setModal("upgrade")}>{t.upgradePro} ✦</button>}
-                  {isPro&&<div style={{background:"#13131C",borderRadius:14,padding:"14px 16px",fontSize:13,color:"#888898",textAlign:"center"}}>✦ {t.proActive}</div>}
+                  {isPro&&<div style={{background:th.bgInput,borderRadius:14,padding:"14px 16px",fontSize:13,color:th.textMuted,textAlign:"center"}}>✦ {t.proActive}</div>}
                   <button className="btn-ghost" onClick={logout}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                     {t.signOut}
@@ -1279,11 +1319,11 @@ export default function App() {
                       {t.deleteAccount}
                     </button>
                   ):(
-                    <div style={{background:"#1A0A0A",border:"1.5px solid #FF4D4D44",borderRadius:16,padding:"16px 18px"}}>
+                    <div style={{background:th.bg,border:"1.5px solid #FF4D4D44",borderRadius:16,padding:"16px 18px"}}>
                       <div style={{fontSize:14,fontWeight:600,color:"#FF4D4D",marginBottom:6}}>{t.deleteConfirmTitle}</div>
                       <div style={{fontSize:12,color:"#888880",lineHeight:1.5,marginBottom:14}}>{t.deleteConfirmDesc}</div>
                       <div style={{display:"flex",gap:8}}>
-                        <button onClick={()=>setConfirmDelete(false)} style={{flex:1,background:"#1E1E2A",border:"none",borderRadius:10,color:"#F0EBE1",fontSize:13,fontWeight:600,padding:"10px",cursor:"pointer"}}>{t.cancel}</button>
+                        <button onClick={()=>setConfirmDelete(false)} style={{flex:1,background:th.bgTab,border:"none",borderRadius:10,color:th.text,fontSize:13,fontWeight:600,padding:"10px",cursor:"pointer"}}>{t.cancel}</button>
                         <button onClick={deleteAccount} style={{flex:1,background:"#FF4D4D",border:"none",borderRadius:10,color:"#fff",fontSize:13,fontWeight:700,padding:"10px",cursor:"pointer"}}>{t.delete}</button>
                       </div>
                     </div>
@@ -1292,7 +1332,7 @@ export default function App() {
               </div>
             ):(
               <div>
-                <div style={{textAlign:"center",marginBottom:16}}>
+                <div style={{textAlign:"center",marginBottom:16,color:th.text}}>
                   <div style={{fontSize:40,marginBottom:10}}>👤</div>
                   <div style={{fontSize:16,fontWeight:500,marginBottom:6}}>{t.notSignedIn}</div>
                   <div style={{fontSize:13,color:"#666680",lineHeight:1.5}}>{t.notSignedInDesc}</div>
@@ -1316,9 +1356,9 @@ export default function App() {
             {authStep==="form"&&(<>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
                 <h3 style={{fontFamily:"Playfair Display,serif",fontSize:24}}>{authMode==="signup"?t.createAccount:t.welcomeBack}</h3>
-                <button onClick={()=>{setModal(null);resetAuth();}} style={{background:"none",border:"none",color:"#666680",fontSize:22,cursor:"pointer"}}>×</button>
+                <button onClick={()=>{setModal(null);resetAuth();}} style={{background:"none",border:"none",color:th.textMuted,fontSize:22,cursor:"pointer"}}>×</button>
               </div>
-              <div style={{display:"flex",background:"#13131C",borderRadius:12,padding:4,marginBottom:22}}>
+              <div style={{display:"flex",background:th.bgInput,borderRadius:12,padding:4,marginBottom:22}}>
                 {["signup","login"].map(m=>(
                   <button key={m} className={`tab ${authMode===m?"active":""}`} style={{flex:1}} onClick={()=>{setAuthMode(m);setAuthError("");}}>
                     {m==="signup"?t.signUp:t.logIn}
@@ -1362,7 +1402,7 @@ export default function App() {
             {authStep==="forgot"&&(<>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
                 <h3 style={{fontFamily:"Playfair Display,serif",fontSize:24}}>{t.resetPassword}</h3>
-                <button onClick={()=>{setModal(null);resetAuth();}} style={{background:"none",border:"none",color:"#666680",fontSize:22,cursor:"pointer"}}>×</button>
+                <button onClick={()=>{setModal(null);resetAuth();}} style={{background:"none",border:"none",color:th.textMuted,fontSize:22,cursor:"pointer"}}>×</button>
               </div>
               <button className="step-back" onClick={()=>setAuthStep("form")}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
