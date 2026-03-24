@@ -994,7 +994,7 @@ export default function App() {
   if (loading) return (
     <div style={{minHeight:"100vh",background:th.bg,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:16}}>
       <style>{CSS}</style>
-      <div style={{fontFamily:"Playfair Display,serif",fontSize:28,color:"#F0EBE1",background:"linear-gradient(135deg,#F0EBE1,#A0A0C8)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>{t.appName}</div>
+      <div style={{fontFamily:"Playfair Display,serif",fontSize:28,background:theme==="light"?"linear-gradient(135deg,#2A2010,#5A5AFF)":"linear-gradient(135deg,#F0EBE1,#A0A0C8)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>{t.appName}</div>
       <div className="spinner" style={{width:28,height:28}}/>
     </div>
   );
@@ -1012,7 +1012,7 @@ export default function App() {
             <div style={{fontSize:12,color:th.textMuted,letterSpacing:"2px",textTransform:"uppercase",marginBottom:5}}>
               {new Date().toLocaleDateString(language === "en" ? "en-US" : language, {weekday:"long",month:"long",day:"numeric"})}
             </div>
-            <h1 style={{fontFamily:"Playfair Display,serif",fontSize:32,fontWeight:700,lineHeight:1.1,background:"linear-gradient(135deg,#F0EBE1 30%,#A0A0C8 100%)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
+            <h1 style={{fontFamily:"Playfair Display,serif",fontSize:32,fontWeight:700,lineHeight:1.1,background:theme==="light"?"linear-gradient(135deg,#1A1008 30%,#5A5AFF 100%)":"linear-gradient(135deg,#F0EBE1 30%,#A0A0C8 100%)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
               {completedToday===habits.length&&habits.length>0 ? t.perfectDay : t.appName}
             </h1>
           </div>
@@ -1049,7 +1049,7 @@ export default function App() {
                 </div>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontWeight:600,fontSize:17,marginBottom:4}}>{completedToday} / {habits.length} {t.done}</div>
-                  <div key={quoteIdx} style={{fontSize:12,color:"#888899",fontStyle:"italic",lineHeight:1.5,animation:"fadeIn .6s"}}>"{t.quotes[quoteIdx % t.quotes.length]}"</div>
+                  <div key={quoteIdx} style={{fontSize:12,color:th.textMuted,fontStyle:"italic",lineHeight:1.5,animation:"fadeIn .6s"}}>"{t.quotes[quoteIdx % t.quotes.length]}"</div>
                 </div>
               </div>
             )}
@@ -1066,7 +1066,7 @@ export default function App() {
             {habits.length===0?(
               <div style={{textAlign:"center",padding:"60px 0",color:"#444460"}}>
                 <div style={{fontSize:48,marginBottom:14}}>✦</div>
-                <div style={{fontSize:17,fontWeight:500,marginBottom:6,color:"#888898"}}>{t.noHabits}</div>
+                <div style={{fontSize:17,fontWeight:500,marginBottom:6,color:th.textMuted}}>{t.noHabits}</div>
                 <div style={{fontSize:13}}>{t.noHabitsDesc}</div>
               </div>
             ):(
@@ -1106,11 +1106,11 @@ export default function App() {
 
         {view==="stats"&&(
           <div className="slide-up">
-            <h2 style={{fontFamily:"Playfair Display,serif",fontSize:26,marginBottom:22}}>{t.statsTitle}</h2>
+            <h2 style={{fontFamily:"Playfair Display,serif",fontSize:26,marginBottom:22,color:th.text}}>{t.statsTitle}</h2>
             {!isPro?(
               <div style={{background:th.bgCard,border:`1px solid ${th.border}`,borderRadius:22,padding:28,textAlign:"center"}}>
                 <div style={{fontSize:40,marginBottom:12}}>📊</div>
-                <div style={{fontFamily:"Playfair Display,serif",fontSize:20,marginBottom:8}}>{t.statsProOnly}</div>
+                <div style={{fontFamily:"Playfair Display,serif",fontSize:20,marginBottom:8,color:th.text}}>{t.statsProOnly}</div>
                 <div style={{fontSize:13,color:"#666680",marginBottom:20,lineHeight:1.6}}>{t.statsProDesc}</div>
                 <button className="btn-primary" onClick={()=>setModal("upgrade")}>{t.unlockStats}</button>
               </div>
@@ -1185,7 +1185,7 @@ export default function App() {
         <div className="modal-bg" onClick={e=>{if(e.target===e.currentTarget){setModal(null);setEditTarget(null);}}}>
           <div className="modal">
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:22}}>
-              <h3 style={{fontFamily:"Playfair Display,serif",fontSize:24}}>{modal==="edit"?t.editHabit:t.newHabit}</h3>
+              <h3 style={{fontFamily:"Playfair Display,serif",fontSize:24,color:th.text}}>{modal==="edit"?t.editHabit:t.newHabit}</h3>
               <button onClick={()=>{setModal(null);setEditTarget(null);}} style={{background:"none",border:"none",color:th.textMuted,fontSize:22,cursor:"pointer"}}>×</button>
             </div>
             <div style={{display:"flex",flexDirection:"column",gap:16}}>
@@ -1214,7 +1214,7 @@ export default function App() {
           <div className="modal-bg" onClick={e=>{if(e.target===e.currentTarget)setModal(null);}}>
             <div className="modal">
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-                <div><h3 style={{fontFamily:"Playfair Display,serif",fontSize:22}}>{h.icon} {t.editStreak}</h3><div style={{fontSize:12,color:"#666680",marginTop:2}}>{t.tapDayToggle}</div></div>
+                <div><h3 style={{fontFamily:"Playfair Display,serif",fontSize:22,color:th.text}}>{h.icon} {t.editStreak}</h3><div style={{fontSize:12,color:"#666680",marginTop:2}}>{t.tapDayToggle}</div></div>
                 <button onClick={()=>setModal(null)} style={{background:"none",border:"none",color:th.textMuted,fontSize:22,cursor:"pointer"}}>×</button>
               </div>
               <div style={{marginTop:18}}>
@@ -1241,7 +1241,7 @@ export default function App() {
         <div className="modal-bg" onClick={e=>{if(e.target===e.currentTarget)setModal(null);}}>
           <div className="modal">
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
-              <h3 style={{fontFamily:"Playfair Display,serif",fontSize:26}}>{t.upgradeTitle}</h3>
+              <h3 style={{fontFamily:"Playfair Display,serif",fontSize:26,color:th.text}}>{t.upgradeTitle}</h3>
               <button onClick={()=>setModal(null)} style={{background:"none",border:"none",color:th.textMuted,fontSize:22,cursor:"pointer"}}>×</button>
             </div>
             <p style={{fontSize:13,color:"#666680",marginBottom:22}}>{t.unlockPotential}</p>
@@ -1287,7 +1287,7 @@ export default function App() {
         <div className="modal-bg" onClick={e=>{if(e.target===e.currentTarget){setModal(null);setConfirmDelete(false);}}}>
           <div className="modal">
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-              <h3 style={{fontFamily:"Playfair Display,serif",fontSize:24}}>{t.account}</h3>
+              <h3 style={{fontFamily:"Playfair Display,serif",fontSize:24,color:th.text}}>{t.account}</h3>
               <button onClick={()=>{setModal(null);setConfirmDelete(false);}} style={{background:"none",border:"none",color:th.textMuted,fontSize:22,cursor:"pointer"}}>×</button>
             </div>
             {user?(
@@ -1355,7 +1355,7 @@ export default function App() {
 
             {authStep==="form"&&(<>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-                <h3 style={{fontFamily:"Playfair Display,serif",fontSize:24}}>{authMode==="signup"?t.createAccount:t.welcomeBack}</h3>
+                <h3 style={{fontFamily:"Playfair Display,serif",fontSize:24,color:th.text}}>{authMode==="signup"?t.createAccount:t.welcomeBack}</h3>
                 <button onClick={()=>{setModal(null);resetAuth();}} style={{background:"none",border:"none",color:th.textMuted,fontSize:22,cursor:"pointer"}}>×</button>
               </div>
               <div style={{display:"flex",background:th.bgInput,borderRadius:12,padding:4,marginBottom:22}}>
@@ -1401,7 +1401,7 @@ export default function App() {
 
             {authStep==="forgot"&&(<>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
-                <h3 style={{fontFamily:"Playfair Display,serif",fontSize:24}}>{t.resetPassword}</h3>
+                <h3 style={{fontFamily:"Playfair Display,serif",fontSize:24,color:th.text}}>{t.resetPassword}</h3>
                 <button onClick={()=>{setModal(null);resetAuth();}} style={{background:"none",border:"none",color:th.textMuted,fontSize:22,cursor:"pointer"}}>×</button>
               </div>
               <button className="step-back" onClick={()=>setAuthStep("form")}>
