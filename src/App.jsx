@@ -1478,7 +1478,8 @@ export default function App() {
                   </div>
                   <div>
                     <div style={{fontWeight:600,fontSize:16,color:th.text}}>{userName}</div>
-                    <div style={{fontSize:12,color:"#666680"}}>{user.email}</div>
+                    {user?.user_metadata?.username&&<div style={{fontSize:12,color:th.textFaint,marginTop:1}}>@{user.user_metadata.username}</div>}
+                    <div style={{fontSize:12,color:th.textMuted,marginTop:1}}>{user.email}</div>
                     <div style={{marginTop:5,display:"flex",gap:6,flexWrap:"wrap"}}>
                       {isPro?<span style={{background:"linear-gradient(135deg,#FFD166,#FF8C42)",color:"#0A0A0F",fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:99}}>✦ PRO</span>:<span style={{background:"#1E1E2A",color:"#888898",fontSize:11,padding:"2px 8px",borderRadius:99}}>{t.freePlanBadge}</span>}
                       {user.email_confirmed_at&&<span style={{background:"#06D6A018",color:"#06D6A0",fontSize:11,padding:"2px 8px",borderRadius:99,border:"1px solid #06D6A033"}}>✓ {t.verified}</span>}
