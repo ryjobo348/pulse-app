@@ -829,11 +829,17 @@ export default function App() {
 
   const [authMode,    setAuthMode]    = useState("login");
   const [authStep,    setAuthStep]    = useState("form");
-  const [authForm,    setAuthForm]    = useState({ name:"", email:"", password:"" });
+  const [authForm,    setAuthForm]    = useState({ name:"", username:"", email:"", password:"" });
   const [authError,   setAuthError]   = useState("");
   const [authInfo,    setAuthInfo]    = useState("");
   const [authLoading, setAuthLoading] = useState(false);
   const [showPw,      setShowPw]      = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState(null); // null | "checking" | "available" | "taken" | "invalid"
+  const [accountModal,   setAccountModal]   = useState(null); // null | "password" | "email" | "name"
+  const [accountForm,    setAccountForm]    = useState({ name:"", email:"", currentPw:"", newPw:"", confirmPw:"" });
+  const [accountError,   setAccountError]   = useState("");
+  const [accountSuccess, setAccountSuccess] = useState("");
+  const [accountLoading, setAccountLoading] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -890,23 +896,48 @@ export default function App() {
   const resetAuth = () => {
     setAuthStep("form"); setAuthError(""); setAuthInfo("");
     setShowPw(false); setAuthLoading(false);
-    setAuthForm({ name:"", email:"", password:"" });
+    setAuthForm({ name:"", username:"", email:"", password:"" });
+    setUsernameStatus(null);
+  };
+
+  const checkUsername = async (username) => {
+    if (!username) { setUsernameStatus(null); return; }
+    if (!/^[a-z0-9_]{3,20}$/.test(username)) { setUsernameStatus("invalid"); return; }
+    setUsernameStatus("checking");
+    const { data } = await supabase
+      .from("profiles")
+      .select("username")
+      .eq("username", username.toLowerCase())
+      .maybeSingle();
+    setUsernameStatus(data ? "taken" : "available");
   };
   const openAuth = (mode) => { setAuthMode(mode); resetAuth(); setModal("auth"); };
 
   const handleSignup = async () => {
     setAuthError("");
-    if (!authForm.name.trim())         return setAuthError(t.enterName);
-    if (!authForm.email.includes("@")) return setAuthError(t.validEmail);
-    if (authForm.password.length < 6)  return setAuthError(t.passwordLength);
+    if (!authForm.name.trim())                    return setAuthError(t.enterName);
+    if (!authForm.username.trim())                return setAuthError("Please enter a username.");
+    if (!/^[a-z0-9_]{3,20}$/.test(authForm.username)) return setAuthError("Username must be 3-20 characters, lowercase letters, numbers and underscores only.");
+    if (usernameStatus === "taken")               return setAuthError("That username is already taken.");
+    if (usernameStatus === "checking")            return setAuthError("Please wait while we check your username.");
+    if (!authForm.email.includes("@"))            return setAuthError(t.validEmail);
+    if (authForm.password.length < 6)             return setAuthError(t.passwordLength);
     setAuthLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: authForm.email.trim(),
       password: authForm.password,
-      options: { data: { full_name: authForm.name.trim() } }
+      options: { data: { full_name: authForm.name.trim(), username: authForm.username.toLowerCase().trim() } }
     });
+    if (error) { setAuthLoading(false); return setAuthError(error.message); }
+    // Create profile row for username uniqueness
+    if (data?.user) {
+      await supabase.from("profiles").upsert({
+        user_id: data.user.id,
+        username: authForm.username.toLowerCase().trim(),
+        display_name: authForm.name.trim(),
+      });
+    }
     setAuthLoading(false);
-    if (error) return setAuthError(error.message);
     setAuthInfo("A verification email has been sent to:\n" + authForm.email.trim() + "\n\nClick the link in the email to verify your account, then come back and log in.");
     setAuthStep("success");
   };
@@ -957,6 +988,46 @@ export default function App() {
   };
 
   const logout = async () => { await supabase.auth.signOut(); setModal(null); setConfirmDelete(false); };
+
+  const handleChangeName = async () => {
+    setAccountError(""); setAccountSuccess("");
+    if (!accountForm.name.trim()) return setAccountError("Please enter a new name.");
+    setAccountLoading(true);
+    const { error } = await supabase.auth.updateUser({ data: { full_name: accountForm.name.trim() } });
+    setAccountLoading(false);
+    if (error) return setAccountError(error.message);
+    setAccountSuccess("Name updated successfully!");
+    setAccountForm(f => ({...f, name:""}));
+    setTimeout(() => { setAccountModal(null); setAccountSuccess(""); }, 1500);
+  };
+
+  const handleChangeEmail = async () => {
+    setAccountError(""); setAccountSuccess("");
+    if (!accountForm.email.includes("@")) return setAccountError("Please enter a valid email address.");
+    setAccountLoading(true);
+    const { error } = await supabase.auth.updateUser({ email: accountForm.email.trim() });
+    setAccountLoading(false);
+    if (error) return setAccountError(error.message);
+    setAccountSuccess("A confirmation email has been sent to " + accountForm.email.trim() + ". Click the link to confirm your new email.");
+    setAccountForm(f => ({...f, email:""}));
+  };
+
+  const handleChangePassword = async () => {
+    setAccountError(""); setAccountSuccess("");
+    if (!accountForm.currentPw) return setAccountError("Please enter your current password.");
+    if (accountForm.newPw.length < 6) return setAccountError("New password must be at least 6 characters.");
+    if (accountForm.newPw !== accountForm.confirmPw) return setAccountError("New passwords do not match.");
+    setAccountLoading(true);
+    // Re-authenticate first
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email: user.email, password: accountForm.currentPw });
+    if (signInError) { setAccountLoading(false); return setAccountError("Current password is incorrect."); }
+    const { error } = await supabase.auth.updateUser({ password: accountForm.newPw });
+    setAccountLoading(false);
+    if (error) return setAccountError(error.message);
+    setAccountSuccess("Password updated successfully!");
+    setAccountForm(f => ({...f, currentPw:"", newPw:"", confirmPw:""}));
+    setTimeout(() => { setAccountModal(null); setAccountSuccess(""); }, 1500);
+  };
 
   // Force sign out if Supabase returns an auth error (e.g. deleted account)
   const forceSignOut = async (error) => {
@@ -1398,6 +1469,20 @@ export default function App() {
                 </div>
                 <SettingsBlock/>
                 <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                  <div style={{background:th.bgInput,border:`1px solid ${th.border}`,borderRadius:16,padding:"4px 0",marginBottom:4}}>
+                    {[
+                      {icon:"✏️", label:"Change Name",     action:()=>{setAccountModal("name");    setAccountError("");setAccountSuccess("");}},
+                      {icon:"📧", label:"Change Email",    action:()=>{setAccountModal("email");   setAccountError("");setAccountSuccess("");}},
+                      {icon:"🔑", label:"Change Password", action:()=>{setAccountModal("password");setAccountError("");setAccountSuccess("");}},
+                    ].map(({icon,label,action})=>(
+                      <button key={label} onClick={action} style={{width:"100%",background:"none",border:"none",borderBottom:`1px solid ${th.borderFaint}`,padding:"13px 16px",cursor:"pointer",display:"flex",alignItems:"center",gap:10,color:th.text,fontSize:14,fontFamily:"DM Sans,sans-serif",textAlign:"left",transition:"background .2s"}}
+                        onMouseEnter={e=>e.currentTarget.style.background=th.bgHighlight}
+                        onMouseLeave={e=>e.currentTarget.style.background="none"}>
+                        <span style={{fontSize:16}}>{icon}</span>{label}
+                        <span style={{marginLeft:"auto",color:th.textFaint,fontSize:16}}>›</span>
+                      </button>
+                    ))}
+                  </div>
                   {!isPro&&<button className="btn-primary" onClick={()=>setModal("upgrade")}>{t.upgradePro} ✦</button>}
                   {isPro&&<div style={{background:th.bgInput,borderRadius:14,padding:"14px 16px",fontSize:13,color:th.textMuted,textAlign:"center"}}>✦ {t.proActive}</div>}
                   <button className="btn-ghost" onClick={logout}>
@@ -1439,6 +1524,50 @@ export default function App() {
         </div>
       )}
 
+      {/* Account Management Sub-Modals */}
+      {accountModal&&(
+        <div className="modal-bg" onClick={e=>{if(e.target===e.currentTarget){setAccountModal(null);setAccountError("");setAccountSuccess("");}}}>
+          <div className="modal">
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:22}}>
+              <h3 style={{fontFamily:"Playfair Display,serif",fontSize:22,color:th.text}}>
+                {accountModal==="name"?"✏️ Change Name":accountModal==="email"?"📧 Change Email":"🔑 Change Password"}
+              </h3>
+              <button onClick={()=>{setAccountModal(null);setAccountError("");setAccountSuccess("");}} style={{background:"none",border:"none",color:th.textMuted,fontSize:22,cursor:"pointer"}}>×</button>
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:12}}>
+              {accountModal==="name"&&(
+                <>
+                  <div style={{fontSize:13,color:th.textMuted,marginBottom:4}}>Current name: <strong style={{color:th.text}}>{userName}</strong></div>
+                  <input className="field" placeholder="New display name" autoComplete="off" autoFocus value={accountForm.name} onChange={e=>setAccountForm(f=>({...f,name:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&handleChangeName()}/>
+                </>
+              )}
+              {accountModal==="email"&&(
+                <>
+                  <div style={{fontSize:13,color:th.textMuted,marginBottom:4}}>Current email: <strong style={{color:th.text}}>{user?.email}</strong></div>
+                  <input className="field" placeholder="New email address" type="email" autoComplete="off" autoFocus value={accountForm.email} onChange={e=>setAccountForm(f=>({...f,email:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&handleChangeEmail()}/>
+                </>
+              )}
+              {accountModal==="password"&&(
+                <>
+                  <div className="pw-wrap">
+                    <input className="field" placeholder="Current password" type={showPw?"text":"password"} autoComplete="current-password" autoFocus value={accountForm.currentPw} onChange={e=>setAccountForm(f=>({...f,currentPw:e.target.value}))}/>
+                    <button className="pw-eye" onClick={()=>setShowPw(v=>!v)} type="button"><EyeIcon open={showPw}/></button>
+                  </div>
+                  <input className="field" placeholder="New password (min. 6 characters)" type="password" autoComplete="new-password" value={accountForm.newPw} onChange={e=>setAccountForm(f=>({...f,newPw:e.target.value}))}/>
+                  <input className="field" placeholder="Confirm new password" type="password" autoComplete="new-password" value={accountForm.confirmPw} onChange={e=>setAccountForm(f=>({...f,confirmPw:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&handleChangePassword()}/>
+                </>
+              )}
+              {accountError&&<div className="err-box">{accountError}</div>}
+              {accountSuccess&&<div style={{background:"#06D6A018",border:"1px solid #06D6A044",borderRadius:12,padding:"11px 14px",fontSize:13,color:"#06D6A0"}}>{accountSuccess}</div>}
+              <button className="btn-primary" onClick={accountModal==="name"?handleChangeName:accountModal==="email"?handleChangeEmail:handleChangePassword} disabled={accountLoading}>
+                {accountLoading&&<div className="spinner"/>}
+                {accountModal==="name"?"Update Name":accountModal==="email"?"Send Confirmation":"Update Password"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Auth */}
       {modal==="auth"&&(
         <div className="modal-bg" onClick={e=>{if(e.target===e.currentTarget){setModal(null);resetAuth();}}}>
@@ -1458,6 +1587,25 @@ export default function App() {
               </div>
               <div style={{display:"flex",flexDirection:"column",gap:12}}>
                 {authMode==="signup"&&<input className="field" placeholder={t.yourName} autoComplete="off" value={authForm.name} onChange={e=>setAuthForm(f=>({...f,name:e.target.value}))} autoFocus/>}
+                {authMode==="signup"&&(
+                  <div>
+                    <div style={{position:"relative"}}>
+                      <span style={{position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",color:th.textFaint,fontSize:15,pointerEvents:"none"}}>@</span>
+                      <input className="field" placeholder="username" autoComplete="off" style={{paddingLeft:28}}
+                        value={authForm.username}
+                        onChange={e=>{
+                          const val = e.target.value.toLowerCase().replace(/[^a-z0-9_]/g,"");
+                          setAuthForm(f=>({...f,username:val}));
+                          if(val.length>=3) checkUsername(val);
+                          else setUsernameStatus(null);
+                        }}/>
+                    </div>
+                    {usernameStatus==="checking"&&<div style={{fontSize:11,color:th.textMuted,marginTop:4,paddingLeft:4}}>⏳ Checking availability...</div>}
+                    {usernameStatus==="available"&&<div style={{fontSize:11,color:"#06D6A0",marginTop:4,paddingLeft:4}}>✓ Available</div>}
+                    {usernameStatus==="taken"&&<div style={{fontSize:11,color:"#FF4D4D",marginTop:4,paddingLeft:4}}>✗ Already taken</div>}
+                    {usernameStatus==="invalid"&&<div style={{fontSize:11,color:"#FF4D4D",marginTop:4,paddingLeft:4}}>✗ 3-20 characters, letters, numbers and _ only</div>}
+                  </div>
+                )}
                 <input className="field" placeholder={t.emailAddress} type="email" autoComplete="off" value={authForm.email} onChange={e=>setAuthForm(f=>({...f,email:e.target.value}))}/>
                 <div>
                   <div className="pw-wrap">
