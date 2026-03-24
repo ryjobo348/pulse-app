@@ -836,7 +836,7 @@ export default function App() {
   const [showPw,      setShowPw]      = useState(false);
   const [usernameStatus, setUsernameStatus] = useState(null); // null | "checking" | "available" | "taken" | "invalid"
   const [accountModal,   setAccountModal]   = useState(null); // null | "password" | "email" | "name"
-  const [accountForm,    setAccountForm]    = useState({ name:"", email:"", currentPw:"", newPw:"", confirmPw:"" });
+  const [accountForm,    setAccountForm]    = useState({ name:"", username:"", email:"", currentPw:"", newPw:"", confirmPw:"" });
   const [accountError,   setAccountError]   = useState("");
   const [accountSuccess, setAccountSuccess] = useState("");
   const [accountLoading, setAccountLoading] = useState(false);
@@ -988,6 +988,24 @@ export default function App() {
   };
 
   const logout = async () => { await supabase.auth.signOut(); setModal(null); setConfirmDelete(false); };
+
+  const handleChangeUsername = async () => {
+    setAccountError(""); setAccountSuccess("");
+    const newUsername = (accountForm.username||"").toLowerCase().trim();
+    if (!newUsername) return setAccountError("Please enter a new username.");
+    if (!/^[a-z0-9_]{3,20}$/.test(newUsername)) return setAccountError("Username must be 3-20 characters, lowercase letters, numbers and underscores only.");
+    if (usernameStatus === "taken") return setAccountError("That username is already taken.");
+    if (usernameStatus === "checking") return setAccountError("Please wait while we check your username.");
+    setAccountLoading(true);
+    const { error: authError } = await supabase.auth.updateUser({ data: { username: newUsername } });
+    if (authError) { setAccountLoading(false); return setAccountError(authError.message); }
+    await supabase.from("profiles").upsert({ user_id: user.id, username: newUsername, display_name: userName });
+    setAccountLoading(false);
+    setAccountSuccess("Username updated successfully!");
+    setAccountForm(f => ({...f, username:""}));
+    setUsernameStatus(null);
+    setTimeout(() => { setAccountModal(null); setAccountSuccess(""); }, 1500);
+  };
 
   const handleChangeName = async () => {
     setAccountError(""); setAccountSuccess("");
@@ -1472,6 +1490,7 @@ export default function App() {
                   <div style={{background:th.bgInput,border:`1px solid ${th.border}`,borderRadius:16,padding:"4px 0",marginBottom:4}}>
                     {[
                       {icon:"✏️", label:"Change Name",     action:()=>{setAccountModal("name");    setAccountError("");setAccountSuccess("");}},
+                      {icon:"👤", label:"Change Username", action:()=>{setAccountModal("username");setAccountError("");setAccountSuccess("");}},
                       {icon:"📧", label:"Change Email",    action:()=>{setAccountModal("email");   setAccountError("");setAccountSuccess("");}},
                       {icon:"🔑", label:"Change Password", action:()=>{setAccountModal("password");setAccountError("");setAccountSuccess("");}},
                     ].map(({icon,label,action})=>(
@@ -1530,7 +1549,7 @@ export default function App() {
           <div className="modal">
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:22}}>
               <h3 style={{fontFamily:"Playfair Display,serif",fontSize:22,color:th.text}}>
-                {accountModal==="name"?"✏️ Change Name":accountModal==="email"?"📧 Change Email":"🔑 Change Password"}
+                {accountModal==="name"?"✏️ Change Name":accountModal==="username"?"👤 Change Username":accountModal==="email"?"📧 Change Email":"🔑 Change Password"}
               </h3>
               <button onClick={()=>{setAccountModal(null);setAccountError("");setAccountSuccess("");}} style={{background:"none",border:"none",color:th.textMuted,fontSize:22,cursor:"pointer"}}>×</button>
             </div>
@@ -1539,6 +1558,28 @@ export default function App() {
                 <>
                   <div style={{fontSize:13,color:th.textMuted,marginBottom:4}}>Current name: <strong style={{color:th.text}}>{userName}</strong></div>
                   <input className="field" placeholder="New display name" autoComplete="off" autoFocus value={accountForm.name} onChange={e=>setAccountForm(f=>({...f,name:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&handleChangeName()}/>
+                </>
+              )}
+              {accountModal==="username"&&(
+                <>
+                  <div style={{fontSize:13,color:th.textMuted,marginBottom:4}}>Current username: <strong style={{color:th.text}}>@{user?.user_metadata?.username||"not set"}</strong></div>
+                  <div>
+                    <div style={{position:"relative"}}>
+                      <span style={{position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",color:th.textFaint,fontSize:15,pointerEvents:"none"}}>@</span>
+                      <input className="field" placeholder="new_username" autoComplete="off" autoFocus style={{paddingLeft:28}}
+                        value={accountForm.username||""}
+                        onChange={e=>{
+                          const val = e.target.value.toLowerCase().replace(/[^a-z0-9_]/g,"");
+                          setAccountForm(f=>({...f,username:val}));
+                          if(val.length>=3) checkUsername(val);
+                          else setUsernameStatus(null);
+                        }}/>
+                    </div>
+                    {usernameStatus==="checking"&&<div style={{fontSize:11,color:th.textMuted,marginTop:4,paddingLeft:4}}>⏳ Checking availability...</div>}
+                    {usernameStatus==="available"&&<div style={{fontSize:11,color:"#06D6A0",marginTop:4,paddingLeft:4}}>✓ Available</div>}
+                    {usernameStatus==="taken"&&<div style={{fontSize:11,color:"#FF4D4D",marginTop:4,paddingLeft:4}}>✗ Already taken</div>}
+                    {usernameStatus==="invalid"&&<div style={{fontSize:11,color:"#FF4D4D",marginTop:4,paddingLeft:4}}>✗ 3-20 characters, letters, numbers and _ only</div>}
+                  </div>
                 </>
               )}
               {accountModal==="email"&&(
@@ -1559,9 +1600,9 @@ export default function App() {
               )}
               {accountError&&<div className="err-box">{accountError}</div>}
               {accountSuccess&&<div style={{background:"#06D6A018",border:"1px solid #06D6A044",borderRadius:12,padding:"11px 14px",fontSize:13,color:"#06D6A0"}}>{accountSuccess}</div>}
-              <button className="btn-primary" onClick={accountModal==="name"?handleChangeName:accountModal==="email"?handleChangeEmail:handleChangePassword} disabled={accountLoading}>
+              <button className="btn-primary" onClick={accountModal==="name"?handleChangeName:accountModal==="username"?handleChangeUsername:accountModal==="email"?handleChangeEmail:handleChangePassword} disabled={accountLoading}>
                 {accountLoading&&<div className="spinner"/>}
-                {accountModal==="name"?"Update Name":accountModal==="email"?"Send Confirmation":"Update Password"}
+                {accountModal==="name"?"Update Name":accountModal==="username"?"Update Username":accountModal==="email"?"Send Confirmation":"Update Password"}
               </button>
             </div>
           </div>
