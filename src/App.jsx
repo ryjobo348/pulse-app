@@ -1046,7 +1046,7 @@ export default function App() {
                         </div>
                       </div>
                       <div style={{display:"flex",gap:2}}>
-                        <button onClick={()=>{setEditTarget(h.id);setModal("streak");}} style={{background:"none",border:"none",cursor:"pointer",color:"#444460",fontSize:15,padding:"4px 6px",transition:"color .2s"}} onMouseEnter={e=>e.target.style.color="#FFD166"} onMouseLeave={e=>e.target.style.color="#444460"}>📅</button>
+                        <button onClick={()=>{if(!isPro){setModal("upgrade");return;}setEditTarget(h.id);setModal("streak");}} style={{background:"none",border:"none",cursor:"pointer",color:"#444460",fontSize:15,padding:"4px 6px",transition:"color .2s"}} onMouseEnter={e=>e.target.style.color="#FFD166"} onMouseLeave={e=>e.target.style.color="#444460"}>📅</button>
                         <button onClick={()=>openEdit(h)} style={{background:"none",border:"none",cursor:"pointer",color:"#444460",fontSize:15,padding:"4px 6px",transition:"color .2s"}} onMouseEnter={e=>e.target.style.color="#5A5AFF"} onMouseLeave={e=>e.target.style.color="#444460"}>✏️</button>
                         <button className="del-btn" onClick={()=>deleteHabit(h.id)}>×</button>
                       </div>
