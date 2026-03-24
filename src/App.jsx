@@ -835,6 +835,7 @@ export default function App() {
   const [authLoading, setAuthLoading] = useState(false);
   const [showPw,      setShowPw]      = useState(false);
   const [usernameStatus, setUsernameStatus] = useState(null); // null | "checking" | "available" | "taken" | "invalid"
+  const [magicLinkSent,  setMagicLinkSent]  = useState(false);
   const [accountModal,   setAccountModal]   = useState(null); // null | "password" | "email" | "name"
   const [accountForm,    setAccountForm]    = useState({ name:"", username:"", email:"", currentPw:"", newPw:"", confirmPw:"" });
   const [accountError,   setAccountError]   = useState("");
@@ -897,7 +898,7 @@ export default function App() {
     setAuthStep("form"); setAuthError(""); setAuthInfo("");
     setShowPw(false); setAuthLoading(false);
     setAuthForm({ name:"", username:"", email:"", password:"" });
-    setUsernameStatus(null);
+    setUsernameStatus(null); setMagicLinkSent(false);
   };
 
   const checkUsername = async (username) => {
@@ -977,6 +978,19 @@ export default function App() {
     if (error) return setAuthError(error.message);
     setAuthInfo("A password reset link has been sent to:\n" + authForm.email.trim() + "\n\nCheck your inbox and follow the link to set a new password.");
     setAuthStep("success");
+  };
+
+  const handleMagicLink = async () => {
+    setAuthError("");
+    if (!authForm.email.includes("@")) return setAuthError(t.validEmail);
+    setAuthLoading(true);
+    const { error } = await supabase.auth.signInWithOtp({
+      email: authForm.email.trim(),
+      options: { shouldCreateUser: false }
+    });
+    setAuthLoading(false);
+    if (error) return setAuthError("Could not send magic link. Please check your email address.");
+    setMagicLinkSent(true);
   };
 
   const handleResendConfirmation = async () => {
@@ -1671,6 +1685,25 @@ export default function App() {
                   {authLoading&&<div className="spinner"/>}
                   {authMode==="signup"?t.createAccount:t.logIn}
                 </button>
+                {authMode==="login"&&!magicLinkSent&&(
+                  <div style={{display:"flex",alignItems:"center",gap:10,margin:"4px 0"}}>
+                    <div style={{flex:1,height:1,background:th.border}}/>
+                    <span style={{fontSize:11,color:th.textFaint}}>or</span>
+                    <div style={{flex:1,height:1,background:th.border}}/>
+                  </div>
+                )}
+                {authMode==="login"&&!magicLinkSent&&(
+                  <button className="btn-ghost" onClick={handleMagicLink} disabled={authLoading}>
+                    {authLoading&&<div className="spinner"/>}
+                    ✉️ Send me a login link
+                  </button>
+                )}
+                {authMode==="login"&&magicLinkSent&&(
+                  <div style={{background:"#06D6A018",border:"1px solid #06D6A044",borderRadius:12,padding:"12px 14px",fontSize:13,color:"#06D6A0",textAlign:"center",lineHeight:1.6}}>
+                    ✓ Magic link sent to {authForm.email}!<br/>
+                    <span style={{fontSize:11,color:th.textMuted}}>Check your inbox and click the link to log in.</span>
+                  </div>
+                )}
                 <div style={{textAlign:"center",fontSize:12,color:"#444460"}}>
                   {authMode==="signup"?t.alreadyHaveAccount+" ":t.noAccount+" "}
                   <button className="btn-link" onClick={()=>{setAuthMode(m=>m==="signup"?"login":"signup");setAuthError("");}}>
