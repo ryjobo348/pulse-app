@@ -659,6 +659,81 @@ const LIGHT_THEME = {
   settingsBorder:"#DDD8CC",
 };
 
+const PRO_THEMES = {
+  midnight_purple:{
+    name:"Midnight Purple", emoji:"💜",
+    bg:"#0D0A1A", bgCard:"#130F24", bgInput:"#1A1530", bgModal:"#100D1E",
+    bgTab:"#221B38", bgHighlight:"#1A1530",
+    border:"#3A2E5A", borderLight:"#2A2240", borderFaint:"#1E1A30",
+    text:"#EDE8FF", textMuted:"#7B6FA0", textFaint:"#5A5080", textVeryFaint:"#3A3060",
+    orbOpacity:".18", navBg:"rgba(13,10,26,.9)",
+    ringBg:"#2A2240", modalOverlay:"rgba(0,0,0,.82)",
+    errBg:"#FF4D4D14", errBorder:"#FF4D4D44", errText:"#FF7070",
+    infoBg:"#1A1530", infoBorder:"#3A2E5A", infoText:"#A090D0",
+    settingsBorder:"#2A2240", accent:"#8B5CF6",
+  },
+  ocean_blue:{
+    name:"Ocean Blue", emoji:"🌊",
+    bg:"#050F1A", bgCard:"#081524", bgInput:"#0C1E30", bgModal:"#060F1E",
+    bgTab:"#0F2240", bgHighlight:"#0C1E30",
+    border:"#1A3A5A", borderLight:"#102A40", borderFaint:"#0A1E30",
+    text:"#E0F0FF", textMuted:"#5A88AA", textFaint:"#3A6080", textVeryFaint:"#1A4060",
+    orbOpacity:".18", navBg:"rgba(5,15,26,.9)",
+    ringBg:"#102A40", modalOverlay:"rgba(0,0,0,.82)",
+    errBg:"#FF4D4D14", errBorder:"#FF4D4D44", errText:"#FF7070",
+    infoBg:"#0C1E30", infoBorder:"#1A3A5A", infoText:"#80B0D0",
+    settingsBorder:"#102A40", accent:"#0EA5E9",
+  },
+  forest_green:{
+    name:"Forest Green", emoji:"🌿",
+    bg:"#050F0A", bgCard:"#081508", bgInput:"#0C1E10", bgModal:"#060F08",
+    bgTab:"#0F2A14", bgHighlight:"#0C1E10",
+    border:"#1A4A20", borderLight:"#102A14", borderFaint:"#0A1E0C",
+    text:"#E0FFE8", textMuted:"#5A9A60", textFaint:"#3A7040", textVeryFaint:"#1A4020",
+    orbOpacity:".18", navBg:"rgba(5,15,10,.9)",
+    ringBg:"#102A14", modalOverlay:"rgba(0,0,0,.82)",
+    errBg:"#FF4D4D14", errBorder:"#FF4D4D44", errText:"#FF7070",
+    infoBg:"#0C1E10", infoBorder:"#1A4A20", infoText:"#80C090",
+    settingsBorder:"#102A14", accent:"#10B981",
+  },
+  rose_gold:{
+    name:"Rose Gold", emoji:"🌸",
+    bg:"#1A0E10", bgCard:"#241218", bgInput:"#2E1820", bgModal:"#1E1014",
+    bgTab:"#3A2028", bgHighlight:"#2E1820",
+    border:"#5A2E38", borderLight:"#3A2028", borderFaint:"#2A1820",
+    text:"#FFE8EC", textMuted:"#AA7080", textFaint:"#885060", textVeryFaint:"#5A3040",
+    orbOpacity:".18", navBg:"rgba(26,14,16,.9)",
+    ringBg:"#3A2028", modalOverlay:"rgba(0,0,0,.82)",
+    errBg:"#FF4D4D14", errBorder:"#FF4D4D44", errText:"#FF9090",
+    infoBg:"#2E1820", infoBorder:"#5A2E38", infoText:"#D090A0",
+    settingsBorder:"#3A2028", accent:"#F43F5E",
+  },
+  sunset_orange:{
+    name:"Sunset Orange", emoji:"🌅",
+    bg:"#1A0E00", bgCard:"#241400", bgInput:"#2E1A00", bgModal:"#1E1000",
+    bgTab:"#3A2200", bgHighlight:"#2E1A00",
+    border:"#5A3A00", borderLight:"#3A2800", borderFaint:"#2A1A00",
+    text:"#FFF0D0", textMuted:"#AA8040", textFaint:"#886020", textVeryFaint:"#5A4010",
+    orbOpacity:".18", navBg:"rgba(26,14,0,.9)",
+    ringBg:"#3A2800", modalOverlay:"rgba(0,0,0,.82)",
+    errBg:"#FF4D4D14", errBorder:"#FF4D4D44", errText:"#FF9070",
+    infoBg:"#2E1A00", infoBorder:"#5A3A00", infoText:"#D0A060",
+    settingsBorder:"#3A2800", accent:"#F59E0B",
+  },
+  arctic_white:{
+    name:"Arctic White", emoji:"❄️",
+    bg:"#FFFFFF", bgCard:"#F8F8F8", bgInput:"#F0F0F0", bgModal:"#FAFAFA",
+    bgTab:"#E8E8E8", bgHighlight:"#EEEEEE",
+    border:"#CCCCCC", borderLight:"#DDDDDD", borderFaint:"#E8E8E8",
+    text:"#111111", textMuted:"#666666", textFaint:"#999999", textVeryFaint:"#BBBBBB",
+    orbOpacity:".06", navBg:"rgba(255,255,255,.92)",
+    ringBg:"#DDDDDD", modalOverlay:"rgba(0,0,0,.5)",
+    errBg:"#FF4D4D14", errBorder:"#FF4D4D44", errText:"#CC2200",
+    infoBg:"#F0F0F0", infoBorder:"#CCCCCC", infoText:"#444444",
+    settingsBorder:"#DDDDDD", accent:"#5A5AFF",
+  },
+};
+
 function getCSS(th) {
   return `
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&family=Playfair+Display:wght@400;700&display=swap');
@@ -747,7 +822,7 @@ export default function App() {
   const today = todayKey();
   const t = T[language] || T.en;
   const prices = PRICES[currency] || PRICES.USD;
-  const th = theme === "light" ? LIGHT_THEME : DARK_THEME;
+  const th = theme === "light" ? LIGHT_THEME : theme === "dark" ? DARK_THEME : (PRO_THEMES[theme] || DARK_THEME);
   const CSS = getCSS(th);
 
   const [form, setForm] = useState({ name:"", icon:"🔥", color:COLORS[0] });
@@ -981,20 +1056,36 @@ export default function App() {
       </div>
       <div className="settings-row">
         <div style={{flex:1}}>
-          <div style={{fontSize:14,fontWeight:600,color:th.text}}>{theme==="dark"?"🌙 Dark Mode":"☀️ Light Mode"}</div>
+          <div style={{fontSize:14,fontWeight:600,color:th.text}}>{theme==="dark"?"🌙 Dark Mode":theme==="light"?"☀️ Light Mode":(PRO_THEMES[theme]?.emoji||"🎨")+" "+(PRO_THEMES[theme]?.name||"Custom")}</div>
           <div style={{fontSize:11,color:th.textMuted,marginTop:2}}>{theme==="dark"?"Switch to light mode":"Switch to dark mode"}</div>
         </div>
-        <button onClick={()=>setTheme(t=>t==="dark"?"light":"dark")} style={{background:theme==="dark"?"#1E1E2A":"#DDD8CC",border:`1.5px solid ${th.border}`,borderRadius:99,width:48,height:26,cursor:"pointer",position:"relative",transition:"background .3s",flexShrink:0}}>
-          <div style={{position:"absolute",top:3,left:theme==="dark"?3:23,width:18,height:18,borderRadius:"50%",background:theme==="dark"?"#5A5AFF":"#FFD166",transition:"left .3s",boxShadow:"0 1px 4px rgba(0,0,0,.3)"}}/>
+        <button onClick={()=>setTheme(t=>t==="dark"?"light":"dark")} style={{background:theme==="light"?"#DDD8CC":"#1E1E2A",border:`1.5px solid ${th.border}`,borderRadius:99,width:48,height:26,cursor:"pointer",position:"relative",transition:"background .3s",flexShrink:0}}>
+          <div style={{position:"absolute",top:3,left:theme==="light"?23:3,width:18,height:18,borderRadius:"50%",background:theme==="light"?"#FFD166":"#5A5AFF",transition:"left .3s",boxShadow:"0 1px 4px rgba(0,0,0,.3)"}}/>
         </button>
       </div>
+      {isPro&&(
+        <div className="settings-row" style={{flexDirection:"column",alignItems:"flex-start",gap:10}}>
+          <div>
+            <div style={{fontSize:14,fontWeight:600,color:th.text}}>🎨 Pro Themes</div>
+            <div style={{fontSize:11,color:th.textMuted,marginTop:2}}>Choose your colour theme</div>
+          </div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:8,width:"100%"}}>
+            {[{id:"dark",emoji:"🌑",name:"Dark"},{id:"light",emoji:"☀️",name:"Light"},...Object.entries(PRO_THEMES).map(([id,t])=>({id,emoji:t.emoji,name:t.name}))].map(({id,emoji,name})=>(
+              <button key={id} onClick={()=>setTheme(id)}
+                style={{background:theme===id?"linear-gradient(135deg,#5A5AFF,#A855F7)":th.bgInput,border:`1.5px solid ${theme===id?"#5A5AFF":th.border}`,borderRadius:10,padding:"6px 10px",cursor:"pointer",fontSize:11,color:theme===id?"#fff":th.text,fontFamily:"DM Sans,sans-serif",fontWeight:theme===id?700:400,display:"flex",alignItems:"center",gap:4,transition:"all .2s"}}>
+                {emoji} {name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 
   if (loading) return (
     <div style={{minHeight:"100vh",background:th.bg,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:16}}>
       <style>{CSS}</style>
-      <div style={{fontFamily:"Playfair Display,serif",fontSize:28,color:theme==="light"?"#1A1008":"#F0EBE1"}}>{t.appName}</div>
+      <div style={{fontFamily:"Playfair Display,serif",fontSize:28,color:th.text}}>{t.appName}</div>
       <div className="spinner" style={{width:28,height:28}}/>
     </div>
   );
@@ -1012,7 +1103,7 @@ export default function App() {
             <div style={{fontSize:12,color:th.textMuted,letterSpacing:"2px",textTransform:"uppercase",marginBottom:5}}>
               {new Date().toLocaleDateString(language === "en" ? "en-US" : language, {weekday:"long",month:"long",day:"numeric"})}
             </div>
-            <h1 style={{fontFamily:"Playfair Display,serif",fontSize:32,fontWeight:700,lineHeight:1.1,color:theme==="light"?"#1A1008":"#F0EBE1"}}>
+            <h1 style={{fontFamily:"Playfair Display,serif",fontSize:32,fontWeight:700,lineHeight:1.1,color:th.text}}>
               {completedToday===habits.length&&habits.length>0 ? t.perfectDay : t.appName}
             </h1>
           </div>
