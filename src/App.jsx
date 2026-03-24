@@ -994,7 +994,7 @@ export default function App() {
   if (loading) return (
     <div style={{minHeight:"100vh",background:th.bg,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:16}}>
       <style>{CSS}</style>
-      <div style={{fontFamily:"Playfair Display,serif",fontSize:28,background:theme==="light"?"linear-gradient(135deg,#2A2010,#5A5AFF)":"linear-gradient(135deg,#F0EBE1,#A0A0C8)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>{t.appName}</div>
+      <div style={{fontFamily:"Playfair Display,serif",fontSize:28,color:theme==="light"?"#1A1008":"#F0EBE1"}}>{t.appName}</div>
       <div className="spinner" style={{width:28,height:28}}/>
     </div>
   );
@@ -1012,7 +1012,7 @@ export default function App() {
             <div style={{fontSize:12,color:th.textMuted,letterSpacing:"2px",textTransform:"uppercase",marginBottom:5}}>
               {new Date().toLocaleDateString(language === "en" ? "en-US" : language, {weekday:"long",month:"long",day:"numeric"})}
             </div>
-            <h1 style={{fontFamily:"Playfair Display,serif",fontSize:32,fontWeight:700,lineHeight:1.1,background:theme==="light"?"linear-gradient(135deg,#1A1008 30%,#5A5AFF 100%)":"linear-gradient(135deg,#F0EBE1 30%,#A0A0C8 100%)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
+            <h1 style={{fontFamily:"Playfair Display,serif",fontSize:32,fontWeight:700,lineHeight:1.1,color:theme==="light"?"#1A1008":"#F0EBE1"}}>
               {completedToday===habits.length&&habits.length>0 ? t.perfectDay : t.appName}
             </h1>
           </div>
