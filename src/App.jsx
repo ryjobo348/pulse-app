@@ -986,10 +986,13 @@ export default function App() {
     setAuthLoading(true);
     const { error } = await supabase.auth.signInWithOtp({
       email: authForm.email.trim(),
-      options: { shouldCreateUser: false }
+      options: {
+        shouldCreateUser: false,
+        emailRedirectTo: "https://pulse-app-taupe.vercel.app"
+      }
     });
     setAuthLoading(false);
-    if (error) return setAuthError("Could not send magic link. Please check your email address.");
+    if (error) return setAuthError("Could not send login link. Make sure you have an existing account with this email.");
     setMagicLinkSent(true);
   };
 
@@ -1685,24 +1688,17 @@ export default function App() {
                   {authLoading&&<div className="spinner"/>}
                   {authMode==="signup"?t.createAccount:t.logIn}
                 </button>
-                {authMode==="login"&&!magicLinkSent&&(
-                  <div style={{display:"flex",alignItems:"center",gap:10,margin:"4px 0"}}>
-                    <div style={{flex:1,height:1,background:th.border}}/>
-                    <span style={{fontSize:11,color:th.textFaint}}>or</span>
-                    <div style={{flex:1,height:1,background:th.border}}/>
-                  </div>
-                )}
-                {authMode==="login"&&!magicLinkSent&&(
-                  <button className="btn-ghost" onClick={handleMagicLink} disabled={authLoading}>
-                    {authLoading&&<div className="spinner"/>}
-                    ✉️ Send me a login link
-                  </button>
-                )}
-                {authMode==="login"&&magicLinkSent&&(
-                  <div style={{background:"#06D6A018",border:"1px solid #06D6A044",borderRadius:12,padding:"12px 14px",fontSize:13,color:"#06D6A0",textAlign:"center",lineHeight:1.6}}>
-                    ✓ Magic link sent to {authForm.email}!<br/>
-                    <span style={{fontSize:11,color:th.textMuted}}>Check your inbox and click the link to log in.</span>
-                  </div>
+                {authMode==="login"&&(
+                  <>
+                    <div style={{display:"flex",alignItems:"center",gap:10,margin:"4px 0"}}>
+                      <div style={{flex:1,height:1,background:th.border}}/>
+                      <span style={{fontSize:11,color:th.textFaint}}>or</span>
+                      <div style={{flex:1,height:1,background:th.border}}/>
+                    </div>
+                    <button className="btn-ghost" onClick={()=>{setAuthError("");setAuthStep("magic");}}>
+                      ✉️ Send me a login link
+                    </button>
+                  </>
                 )}
                 <div style={{textAlign:"center",fontSize:12,color:"#444460"}}>
                   {authMode==="signup"?t.alreadyHaveAccount+" ":t.noAccount+" "}
@@ -1731,6 +1727,45 @@ export default function App() {
                   {t.sendResetLink}
                 </button>
               </div>
+            </>)}
+
+            {authStep==="magic"&&(<>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+                <h3 style={{fontFamily:"Playfair Display,serif",fontSize:24,color:th.text}}>Login Link</h3>
+                <button onClick={()=>{setModal(null);resetAuth();}} style={{background:"none",border:"none",color:th.textMuted,fontSize:22,cursor:"pointer"}}>×</button>
+              </div>
+              <button className="step-back" onClick={()=>{setAuthStep("form");setAuthError("");}}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                {t.backToLoginLink}
+              </button>
+              {!magicLinkSent?(
+                <>
+                  <div style={{fontSize:13,color:th.textMuted,lineHeight:1.6,marginBottom:20}}>Enter your email and we'll send you a one-click login link. No password needed.</div>
+                  <div style={{display:"flex",flexDirection:"column",gap:12}}>
+                    <input className="field" placeholder={t.emailAddress} type="email" autoComplete="off"
+                      value={authForm.email} onChange={e=>setAuthForm(f=>({...f,email:e.target.value}))}
+                      onKeyDown={e=>e.key==="Enter"&&handleMagicLink()} autoFocus/>
+                    {authError&&<div className="err-box">{authError}</div>}
+                    <button className="btn-primary" onClick={handleMagicLink} disabled={authLoading}>
+                      {authLoading&&<div className="spinner"/>}
+                      ✉️ Send Login Link
+                    </button>
+                  </div>
+                </>
+              ):(
+                <div style={{textAlign:"center",padding:"16px 0 8px"}}>
+                  <div className="pop-in" style={{fontSize:60,marginBottom:16,display:"inline-block"}}>✉️</div>
+                  <h3 style={{fontFamily:"Playfair Display,serif",fontSize:24,marginBottom:10,color:th.text}}>Link Sent!</h3>
+                  <div style={{fontSize:13,color:th.textMuted,lineHeight:1.7,marginBottom:20}}>
+                    We sent a login link to:<br/>
+                    <strong style={{color:th.text}}>{authForm.email}</strong><br/><br/>
+                    Click the link in your email to log in instantly. The link expires in 1 hour.
+                  </div>
+                  <button className="btn-ghost" onClick={()=>{setMagicLinkSent(false);setAuthError("");}}>
+                    Resend link
+                  </button>
+                </div>
+              )}
             </>)}
 
             {authStep==="success"&&(
