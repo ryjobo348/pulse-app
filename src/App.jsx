@@ -883,24 +883,31 @@ export default function App() {
     localStorage.setItem("pulse_reminder_on", reminderOn);
   }, [reminderTime, reminderOn]);
 
+  // Register service worker
   useEffect(() => {
-    if (!reminderOn || !reminderTime) return;
-    const checkReminder = () => {
-      const now = new Date();
-      const [h, m] = reminderTime.split(":").map(Number);
-      if (now.getHours() === h && now.getMinutes() === m && now.getSeconds() < 30) {
-        if (Notification.permission === "granted") {
-          const completed = habits.filter(hb => logs[todayKey()]?.[hb.id]).length;
-          const total = habits.length;
-          new Notification("Pulse — Daily Reminder 🔥", {
-            body: total === 0 ? "Time to check in on your habits!" : `${completed}/${total} habits done today. Keep going!`,
-            icon: "/favicon.svg",
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch(err => console.error("SW registration failed:", err));
+    }
+  }, []);
+
+  // Schedule reminder via service worker whenever settings change
+  useEffect(() => {
+    if (!("serviceWorker" in navigator)) return;
+    navigator.serviceWorker.ready.then(reg => {
+      if (reg.active) {
+        if (reminderOn && reminderTime && Notification.permission === "granted") {
+          const completed = habits.filter(h => logs[todayKey()]?.[h.id]).length;
+          reg.active.postMessage({
+            type: "SCHEDULE_REMINDER",
+            time: reminderTime,
+            habitCount: habits.length,
+            completedCount: completed,
           });
+        } else {
+          reg.active.postMessage({ type: "CANCEL_REMINDER" });
         }
       }
-    };
-    const interval = setInterval(checkReminder, 30000);
-    return () => clearInterval(interval);
+    });
   }, [reminderOn, reminderTime, habits, logs]);
 
   const requestNotificationPermission = async () => {
@@ -1405,11 +1412,15 @@ export default function App() {
 
                 {/* Test notification */}
                 {notifPermission==="granted"&&(
-                  <button className="btn-ghost" onClick={()=>{
-                    new Notification("Pulse — Daily Reminder 🔥", {
-                      body: habits.length===0?"Time to check in on your habits!": `${habits.filter(h=>logs[todayKey()]?.[h.id]).length}/${habits.length} habits done today. Keep going!`,
-                      icon:"/favicon.svg",
-                    });
+                  <button className="btn-ghost" onClick={async()=>{
+                    if("serviceWorker" in navigator) {
+                      const reg = await navigator.serviceWorker.ready;
+                      reg.showNotification("Pulse — Daily Reminder 🔥", {
+                        body: habits.length===0?"Time to check in on your habits!":`${habits.filter(h=>logs[todayKey()]?.[h.id]).length}/${habits.length} habits done today. Keep going!`,
+                        icon:"/favicon.svg",
+                        tag:"pulse-test",
+                      });
+                    }
                   }}>
                     🔔 Send a test notification
                   </button>
