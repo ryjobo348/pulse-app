@@ -836,6 +836,9 @@ export default function App() {
   const [showPw,      setShowPw]      = useState(false);
   const [usernameStatus, setUsernameStatus] = useState(null); // null | "checking" | "available" | "taken" | "invalid"
   const [magicLinkSent,  setMagicLinkSent]  = useState(false);
+  const [reminderTime,   setReminderTime]   = useState(() => localStorage.getItem("pulse_reminder") || "");
+  const [reminderOn,     setReminderOn]     = useState(() => localStorage.getItem("pulse_reminder_on") === "true");
+  const [notifPermission, setNotifPermission] = useState(() => typeof Notification !== "undefined" ? Notification.permission : "default");
   const [accountModal,   setAccountModal]   = useState(null); // null | "password" | "email" | "name"
   const [accountForm,    setAccountForm]    = useState({ name:"", username:"", email:"", currentPw:"", newPw:"", confirmPw:"" });
   const [accountError,   setAccountError]   = useState("");
@@ -874,6 +877,38 @@ export default function App() {
   useEffect(() => { localStorage.setItem("pulse_lang", language); }, [language]);
   useEffect(() => { localStorage.setItem("pulse_currency", currency); }, [currency]);
   useEffect(() => { localStorage.setItem("pulse_theme", theme); document.body.style.background = th.bg; }, [theme]);
+
+  useEffect(() => {
+    localStorage.setItem("pulse_reminder", reminderTime);
+    localStorage.setItem("pulse_reminder_on", reminderOn);
+  }, [reminderTime, reminderOn]);
+
+  useEffect(() => {
+    if (!reminderOn || !reminderTime) return;
+    const checkReminder = () => {
+      const now = new Date();
+      const [h, m] = reminderTime.split(":").map(Number);
+      if (now.getHours() === h && now.getMinutes() === m && now.getSeconds() < 30) {
+        if (Notification.permission === "granted") {
+          const completed = habits.filter(hb => logs[todayKey()]?.[hb.id]).length;
+          const total = habits.length;
+          new Notification("Pulse — Daily Reminder 🔥", {
+            body: total === 0 ? "Time to check in on your habits!" : `${completed}/${total} habits done today. Keep going!`,
+            icon: "/favicon.svg",
+          });
+        }
+      }
+    };
+    const interval = setInterval(checkReminder, 30000);
+    return () => clearInterval(interval);
+  }, [reminderOn, reminderTime, habits, logs]);
+
+  const requestNotificationPermission = async () => {
+    if (typeof Notification === "undefined") return "unsupported";
+    const permission = await Notification.requestPermission();
+    setNotifPermission(permission);
+    return permission;
+  };
 
   const loadData = async (userId) => {
     setLoading(true);
@@ -1301,6 +1336,89 @@ export default function App() {
           </div>
         )}
 
+        {view==="reminders"&&(
+          <div className="slide-up">
+            <h2 style={{fontFamily:"Playfair Display,serif",fontSize:26,marginBottom:6,color:th.text}}>🔔 Reminders</h2>
+            <p style={{fontSize:13,color:th.textMuted,marginBottom:22,lineHeight:1.6}}>Get a daily nudge to check in on your habits.</p>
+            {!isPro?(
+              <div style={{background:th.bgCard,border:`1px solid ${th.border}`,borderRadius:22,padding:28,textAlign:"center"}}>
+                <div style={{fontSize:40,marginBottom:12}}>🔔</div>
+                <div style={{fontFamily:"Playfair Display,serif",fontSize:20,marginBottom:8,color:th.text}}>Reminders are Pro only</div>
+                <div style={{fontSize:13,color:th.textMuted,marginBottom:20,lineHeight:1.6}}>Upgrade to Pro to set a daily reminder and never miss a habit again.</div>
+                <button className="btn-primary" onClick={()=>setModal("upgrade")}>Unlock Reminders — Go Pro</button>
+              </div>
+            ):(
+              <div style={{display:"flex",flexDirection:"column",gap:14}}>
+                {/* Permission banner */}
+                {notifPermission==="denied"&&(
+                  <div style={{background:"#FF4D4D14",border:"1px solid #FF4D4D44",borderRadius:16,padding:"14px 16px",fontSize:13,color:"#FF7070",lineHeight:1.6}}>
+                    ⚠️ Notifications are blocked in your browser. Please enable them in your browser settings to receive reminders.
+                  </div>
+                )}
+                {notifPermission==="default"&&(
+                  <div style={{background:th.bgCard,border:`1px solid ${th.border}`,borderRadius:16,padding:"16px 18px",display:"flex",alignItems:"center",gap:14}}>
+                    <span style={{fontSize:28}}>🔔</span>
+                    <div style={{flex:1}}>
+                      <div style={{fontWeight:600,fontSize:14,marginBottom:3,color:th.text}}>Enable notifications</div>
+                      <div style={{fontSize:12,color:th.textMuted}}>Allow Pulse to send you reminder notifications.</div>
+                    </div>
+                    <button className="btn-primary" style={{width:"auto",padding:"8px 14px",fontSize:13}} onClick={async()=>{
+                      const p = await requestNotificationPermission();
+                      if(p==="granted"&&!reminderOn) setReminderOn(true);
+                    }}>Allow</button>
+                  </div>
+                )}
+
+                {/* Reminder toggle */}
+                <div style={{background:th.bgCard,border:`1px solid ${th.border}`,borderRadius:18,padding:"18px 20px"}}>
+                  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:reminderOn?18:0}}>
+                    <div>
+                      <div style={{fontWeight:600,fontSize:15,color:th.text}}>Daily Reminder</div>
+                      <div style={{fontSize:12,color:th.textMuted,marginTop:2}}>
+                        {reminderOn&&reminderTime ? `Reminder set for ${reminderTime}` : "No reminder set"}
+                      </div>
+                    </div>
+                    <button onClick={async()=>{
+                      if(!reminderOn && notifPermission!=="granted") {
+                        const p = await requestNotificationPermission();
+                        if(p!=="granted") return;
+                      }
+                      setReminderOn(v=>!v);
+                    }} style={{background:reminderOn?"linear-gradient(135deg,#5A5AFF,#A855F7)":th.bgHighlight,border:`1.5px solid ${reminderOn?"#5A5AFF":th.border}`,borderRadius:99,width:48,height:26,cursor:"pointer",position:"relative",transition:"all .3s",flexShrink:0}}>
+                      <div style={{position:"absolute",top:3,left:reminderOn?23:3,width:18,height:18,borderRadius:"50%",background:"#fff",transition:"left .3s",boxShadow:"0 1px 4px rgba(0,0,0,.3)"}}/>
+                    </button>
+                  </div>
+                  {reminderOn&&(
+                    <div>
+                      <div style={{fontSize:12,color:th.textMuted,marginBottom:8}}>What time should we remind you?</div>
+                      <input type="time" className="field" value={reminderTime}
+                        onChange={e=>setReminderTime(e.target.value)}
+                        style={{fontSize:18,fontWeight:600,letterSpacing:2}}/>
+                      {reminderTime&&(
+                        <div style={{marginTop:12,background:th.bgHighlight,borderRadius:12,padding:"10px 14px",fontSize:12,color:th.textMuted,lineHeight:1.6}}>
+                          ✓ You'll receive a daily reminder at <strong style={{color:th.text}}>{reminderTime}</strong> showing your habit progress for the day.
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Test notification */}
+                {notifPermission==="granted"&&(
+                  <button className="btn-ghost" onClick={()=>{
+                    new Notification("Pulse — Daily Reminder 🔥", {
+                      body: habits.length===0?"Time to check in on your habits!": `${habits.filter(h=>logs[todayKey()]?.[h.id]).length}/${habits.length} habits done today. Keep going!`,
+                      icon:"/favicon.svg",
+                    });
+                  }}>
+                    🔔 Send a test notification
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {view==="stats"&&(
           <div className="slide-up">
             <h2 style={{fontFamily:"Playfair Display,serif",fontSize:26,marginBottom:22,color:th.text}}>{t.statsTitle}</h2>
@@ -1374,6 +1492,10 @@ export default function App() {
         <button className={`nav-btn ${view==="stats"?"active":""}`} onClick={()=>setView("stats")}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
           {t.stats} {!isPro&&<span className="pro-badge" style={{fontSize:8,padding:"1px 5px"}}>PRO</span>}
+        </button>
+        <button className={`nav-btn ${view==="reminders"?"active":""}`} onClick={()=>setView("reminders")}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          Remind {!isPro&&<span className="pro-badge" style={{fontSize:8,padding:"1px 5px"}}>PRO</span>}
         </button>
       </div>
 
